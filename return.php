@@ -28,7 +28,7 @@ require("../../config.php");
 require_once("$CFG->dirroot/enrol/pagseguro/lib.php");
 
 $id = required_param('id', PARAM_INT);
-$error = optional_param('error', 0, PARAM_INT);
+$error = optional_param('error', '', PARAM_ALPHANUM);
 
 if (!$course = $DB->get_record("course", array("id" => $id))) {
     redirect($CFG->wwwroot);
@@ -50,23 +50,13 @@ $fullname = format_string($course->fullname, true, array('context' => $context))
 if (is_enrolled($context, null, '', true)) { // TODO: use real pagseguro check.
     redirect($destination, get_string('paymentthanks', '', $fullname));
 
-} else if ($error > 0) {
+} else if ($error) {
 
     $PAGE->set_context($context);
     $PAGE->set_url($destination);
     echo $OUTPUT->header();
-    switch ($error) {
-        case 1:
-            notice(get_string('error:unauthorized', 'enrol_pagseguro'), $destination);
-            break;
-        case 2:
-            notice(get_string('error:genericerror', 'enrol_pagseguro'), $destination);
-            break;
-        default:
-            notice(get_string('error:unknownerror', 'enrol_pagseguro'), $destination);
-            break;
-    }
-
+    notice(get_string('error:'.$error, 'enrol_pagseguro'), $destination);
+    echo $OUTPUT->footer();
 
 } else {
     $PAGE->set_url($destination);
@@ -75,4 +65,5 @@ if (is_enrolled($context, null, '', true)) { // TODO: use real pagseguro check.
     $a->teacher = get_string('defaultcourseteacher');
     $a->fullname = $fullname;
     notice(get_string('paymentsorry', '', $a), $destination);
+    echo $OUTPUT->footer();
 }
