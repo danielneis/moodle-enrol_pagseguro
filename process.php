@@ -72,10 +72,9 @@ $plugin = enrol_get_plugin('pagseguro');
 $email = $plugin->get_config('pagsegurobusiness');
 $token = $plugin->get_config('pagsegurotoken');
 
-
 if ($submited) {
 
-    pagseguro_handle_checkout($pagseguroBaseURL, $email, $token, $courseid, $plugin_instance);
+    pagseguro_handle_checkout($pagseguroBaseURL, $email, $token, $courseid, $plugin, $plugin_instance);
 
 } else if ($transactionid) {
 
@@ -324,7 +323,7 @@ function pagseguro_message_error_to_admin($subject, $data) {
     message_send($eventdata);
 }
 
-function pagseguro_handle_checkout($pagseguroBaseURL, $email, $token, $courseid, $plugin_instance) {
+function pagseguro_handle_checkout($pagseguroBaseURL, $email, $token, $courseid, $plugin, $plugin_instance) {
     global $CFG;
 
     $checkoutURL = $pagseguroBaseURL . '/v2/checkout/';
