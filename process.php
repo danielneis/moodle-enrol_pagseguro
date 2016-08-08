@@ -62,7 +62,7 @@ $notificationCode = optional_param('notificationCode', '', PARAM_RAW);
 
 $transactionid = optional_param('transaction_id', '', PARAM_RAW);
 
-if ($plugin->get_config('usesandbox')) {
+if (isset($CFG->pagsegurousesandbox)) {
     $pagseguroBaseURL = 'https://ws.sandbox.pagseguro.uol.com.br';
 } else {
     $pagseguroBaseURL = 'https://ws.pagseguro.uol.com.br';
@@ -86,7 +86,7 @@ if ($submited) {
     pagseguro_handle_old_notification_system($pagseguroBaseURL, $notificationCode, $email, $token, $courseid);
 }
 
-function process_moodle($transaction_data, $instanceid, $cid) {
+function pagseguro_handle_transaction($transaction_data, $instanceid, $cid) {
     global $CFG,$USER,$DB,$course;
 
     /// Read all the data from pagseguro and get it ready for later;
@@ -95,7 +95,6 @@ function process_moodle($transaction_data, $instanceid, $cid) {
     /// it is documented in docs wiki.
 
     $data = new stdClass();
-    $a    = new stdClass();
 
     $transaction = array();
 
@@ -240,6 +239,7 @@ function process_moodle($transaction_data, $instanceid, $cid) {
     $shortname = format_string($course->shortname, true, array('context' => $context));
 
     if (!empty($mailstudents)) {
+        $a = new stdClass();
         $a->coursename = format_string($course->fullname, true, array('context' => $coursecontext));
         $a->profileurl = new moodle_url('/user/view.php', array('id' => $user->id));
 
@@ -258,6 +258,7 @@ function process_moodle($transaction_data, $instanceid, $cid) {
     }
 
     if (!empty($mailteachers)) {
+        $a = new stdClass();
         $a->course = format_string($course->fullname, true, array('context' => $coursecontext));
         $a->user = fullname($user);
 
@@ -276,6 +277,7 @@ function process_moodle($transaction_data, $instanceid, $cid) {
     }
 
     if (!empty($mailadmins)) {
+        $a = new stdClass();
         $a->course = format_string($course->fullname, true, array('context' => $coursecontext));
         $a->user = fullname($user);
         $admins = get_admins();
@@ -296,7 +298,6 @@ function process_moodle($transaction_data, $instanceid, $cid) {
         }
     }
 
-    $returnurl = $CFG->wwwroot.;
     redirect(new moodle_url('/enrol/pagseguro/return.php', array('id' => $courseid)));
 }
 
@@ -394,7 +395,7 @@ function pagseguro_handle_redirect_back($pagseguroBaseURL, $transactionid, $emai
         redirect(new moodle_url('/enrol/pagseguro/return.php', array('id' => $courseid, 'error' => 'unauthorized')));
     } else {
         $transaction_data  = serialize(trim($transaction));
-        process_moodle($transaction_data, $instanceid, $courseid);
+        pagseguro_handle_transaction($transaction_data, $instanceid, $courseid);
     }
 }
 
@@ -416,6 +417,6 @@ function pagseguro_handle_old_notification_system($pagseguroBaseURL, $notificati
         redirect(new moodle_url('/enrol/pagseguro/return.php', array('id' => $courseid, 'error' => 'unauthorized')));
     } else {
         $transaction_data  = serialize(trim($transaction));
-        process_moodle($transaction_data, $instanceid, $courseid);
+        pagseguro_handle_transaction($transaction_data, $instanceid, $courseid);
     }
 }
