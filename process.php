@@ -338,7 +338,7 @@ function pagseguro_handle_checkout($pagseguroBaseURL, $email, $token, $courseid,
     $encoding     = 'UTF-8';
     $currency     = $plugin->get_config('currency');
 
-    $redirect_url = $CFG->wwwroot.'/enrol/pagseguro/process.php?instanceid='.$instanceid;
+    $redirect_url = $CFG->wwwroot.'/enrol/pagseguro/process.php?instanceid='.$plugin_instance->id;
 
     $url = $checkoutURL .'?email=' . urlencode($email) . "&token=" . $token;
 
