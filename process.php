@@ -63,9 +63,11 @@ $notificationCode = optional_param('notificationCode', '', PARAM_RAW);
 $transactionid = optional_param('transaction_id', '', PARAM_RAW);
 
 if (isset($CFG->pagsegurousesandbox)) {
-    $pagseguroBaseURL = 'https://ws.sandbox.pagseguro.uol.com.br';
+    $pagseguroBaseURL = 'https://sandbox.pagseguro.uol.com.br';
+    $pagseguroWSBaseURL = 'https://ws.sandbox.pagseguro.uol.com.br';
 } else {
-    $pagseguroBaseURL = 'https://ws.pagseguro.uol.com.br';
+    $pagseguroBaseURL = 'https://pagseguro.uol.com.br';
+    $pagseguroWSBaseURL = 'https://ws.pagseguro.uol.com.br';
 }
 
 $plugin = enrol_get_plugin('pagseguro');
@@ -74,15 +76,15 @@ $token = $plugin->get_config('pagsegurotoken');
 
 if ($submited) {
 
-    pagseguro_handle_checkout($pagseguroBaseURL, $email, $token, $courseid, $plugin, $plugin_instance);
+    pagseguro_handle_checkout($pagseguroWSBaseURL, $pagseguroBaseURL, $email, $token, $courseid, $plugin, $plugin_instance);
 
 } else if ($transactionid) {
 
-    pagseguro_handle_redirect_back($pagseguroBaseURL, $transactionid, $email, $token, $courseid);
+    pagseguro_handle_redirect_back($pagseguroWSBaseURL, $transactionid, $email, $token, $courseid);
 
 } else if (!empty($notificationCode)) {
 
-    pagseguro_handle_old_notification_system($pagseguroBaseURL, $notificationCode, $email, $token, $courseid);
+    pagseguro_handle_old_notification_system($pagseguroWSBaseURL, $notificationCode, $email, $token, $courseid);
 }
 
 function pagseguro_handle_transaction($transaction_data, $instanceid, $cid) {
@@ -323,10 +325,10 @@ function pagseguro_message_error_to_admin($subject, $data) {
     message_send($eventdata);
 }
 
-function pagseguro_handle_checkout($pagseguroBaseURL, $email, $token, $courseid, $plugin, $plugin_instance) {
+function pagseguro_handle_checkout($pagseguroWSBaseURL, $pagseguroBaseURL, $email, $token, $courseid, $plugin, $plugin_instance) {
     global $CFG;
 
-    $checkoutURL = $pagseguroBaseURL . '/v2/checkout/';
+    $checkoutURL = $pagseguroWSBaseURL . '/v2/checkout/';
 
     $item_id      = $courseid;
     $item_desc    = empty($course->fullname) ? null : $course->fullname;

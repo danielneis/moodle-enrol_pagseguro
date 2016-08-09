@@ -31,7 +31,7 @@ if ($ADMIN->fulltree) {
 
     $settings->add(new admin_setting_heading('enrol_pagseguro_settings', '', get_string('pluginname_desc', 'enrol_pagseguro')));
 
-    $settings->add(new admin_setting_configtext('enrol_pagseguro/pagsegurobusiness', get_string('businessemail', 'enrol_pagseguro'), get_string('businessemail_desc', 'enrol_pagseguro'), '', PARAM_EMAIL));
+    $settings->add(new admin_setting_configtext('enrol_pagseguro/pagsegurobusiness', get_string('businessemail', 'enrol_pagseguro'), get_string('businessemail_desc', 'enrol_pagseguro'), '', PARAM_TEXT));
 
     $settings->add(new admin_setting_configtext('enrol_pagseguro/pagsegurotoken', get_string('businesstoken', 'enrol_pagseguro'), get_string('businesstoken_desc', 'enrol_pagseguro'), '', PARAM_RAW));
 
