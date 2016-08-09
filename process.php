@@ -76,11 +76,11 @@ $token = $plugin->get_config('pagsegurotoken');
 
 if ($submited) {
 
-    pagseguro_handle_checkout($pagseguroWSBaseURL, $pagseguroBaseURL, $email, $token, $courseid, $plugin, $plugin_instance);
+    pagseguro_handle_checkout($pagseguroWSBaseURL, $pagseguroBaseURL, $email, $token, $courseid, $plugin, $plugin_instance, $course);
 
 } else if ($transactionid) {
 
-    pagseguro_handle_redirect_back($pagseguroWSBaseURL, $transactionid, $email, $token, $courseid);
+    pagseguro_handle_redirect_back($pagseguroWSBaseURL, $transactionid, $email, $token, $courseid, $instanceid);
 
 } else if (!empty($notificationCode)) {
 
@@ -187,8 +187,7 @@ function pagseguro_handle_transaction($transaction_data, $instanceid, $cid) {
     if (!in_array($data->status, array(COMMERCE_PAGSEGURO_STATUS_IN_ANALYSIS, COMMERCE_PAGSEGURO_STATUS_PAID, COMMERCE_PAGSEGURO_STATUS_AVAILABLE))) {
         $plugin->unenrol_user($plugin_instance, $data->userid);
         pagseguro_message_error_to_admin("Status not completed or pending. User unenrolled from course", $data);
-        $returnurl .= "?id={$courseid}&waiting=1";
-        header("Location: $returnurl");
+        redirect(new moodle_url('/enrol/pagseguro/return.php', array('id' => $courseid, 'waiting' => 1)));
     }
 
     /*if ($existing = $DB->get_record("enrol_pagseguro", array("txn_id" => $data->txn_id))) {   // Make sure this transaction doesn't exist already
@@ -325,13 +324,13 @@ function pagseguro_message_error_to_admin($subject, $data) {
     message_send($eventdata);
 }
 
-function pagseguro_handle_checkout($pagseguroWSBaseURL, $pagseguroBaseURL, $email, $token, $courseid, $plugin, $plugin_instance) {
+function pagseguro_handle_checkout($pagseguroWSBaseURL, $pagseguroBaseURL, $email, $token, $courseid, $plugin, $plugin_instance, $course) {
     global $CFG;
 
     $checkoutURL = $pagseguroWSBaseURL . '/v2/checkout/';
 
     $item_id      = $courseid;
-    $item_desc    = empty($course->fullname) ? null : $course->fullname;
+    $item_desc    = empty($course->fullname) ? 'Curso moodle': $course->fullname;
     $item_qty     = (int)1;
     $item_cost    = empty($plugin_instance->cost) ? 0.00 : number_format($plugin_instance->cost, 2);
     $item_cost    = str_replace(',', '', $item_cost);
@@ -374,17 +373,16 @@ function pagseguro_handle_checkout($pagseguroWSBaseURL, $pagseguroBaseURL, $emai
     $xml = simplexml_load_string($xml);
 
     if (count($xml->error) > 0) {
+        #print_error(var_export($xml->error, true));
         redirect(new moodle_url('/enrol/pagseguro/return.php', array('id' => $courseid, 'error' => 'generic')));
     }
 
-    header('Location: '. $pagseguroBaseURL . 'payment.html?code='.$xml->code);
+    header('Location: '. $pagseguroBaseURL . '/v2/checkout/payment.html?code='.$xml->code);
 }
 
-function pagseguro_handle_redirect_back($pagseguroBaseURL, $transactionid, $email, $token, $courseid) {
+function pagseguro_handle_redirect_back($pagseguroBaseURL, $transactionid, $email, $token, $courseid, $instanceid) {
 
-    $transactionsv3URL = $pagseguroBaseURL .'/v3/transactions/';
-
-    $url = "{$transactionsv3URL}/notifications/{$transactionid}?email={$email}&token={$token}";
+    $url = "{$pagseguroBaseURL}/v2/transactions/{$transactionid}?email={$email}&token={$token}";
 
     $curl = curl_init($url);
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
