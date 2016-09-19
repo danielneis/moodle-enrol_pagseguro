@@ -1,28 +1,34 @@
 Plugin de inscrição via PagSeguro para o Moodle
 -----------------------------------------------
 
-The PagSeguro enrolment plugin allows you to set up paid courses.
+Este plugin de inscrição permita que você venda seus cursos no Moodle e receba pelo PagSeguro.
 
-The plugin has to be enabled by the site administrator and then added to the course by an administrator or manager.
+Também disponível em https://moodle.org/plugins/enrol_pagseguro
 
-You can then set an individual price for your course if needed.
-
-This is an updated version based on https://moodle.org/plugins/view.php?plugin=enrol_pagseguro
-
-Install
+Instalação
 -------
 
-You must put this code in the directory moodle/enrol/pagseguro
-You can use git clone for this or download the latest version from github at https://github.com/danielneis/moodle-enrol_pagseguro/archive/update-3.0.zip
+Você deve colocar este código no diretório moodle/enrol/pagseguro
 
-Configure
----------
+Você pode fazer o "git clone" deste repositório ou então fazer o download da útlima versão no link https://github.com/danielneis/moodle-enrol_pagseguro/archive/master.zip
+
+Configuração
+------------
 
 * First, enable the plugin at Administration block > Site Administration > Plugins > Enrolments > Manage enrol plugins
 * Then, go to its settings
 * You must create a token at the PagSeguro website and use it to configure your Moodle plugin.
 * Also, at the PagSeguro website, you should set the field "Código de transação para página de redirecionamento" with "transaction_id" (without quotes).
 * Now you can go to any course and add the PagSeguro enrol method. There you will set the cost, currency and the email for the PagSeguro account that will be credited.
+
+Funcionalidades
+---------------
+
+* Para cada curso Moodle, você pode configura o valor que o usuário deve pagar para se inscrever.
+* A inscrição é feita automaticamente no caso de pagamento via cartão de crétido.
+* Não é feita a desinscrição do usuário após devolução do dinheiro no PagSeguro.
+* A inscrição automática via boleto bancário ainda não está funcionando, mas será implementada na próxima versão.
+
 
 Dev Info
 --------
