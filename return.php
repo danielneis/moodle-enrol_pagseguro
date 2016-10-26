@@ -59,6 +59,7 @@ if (is_enrolled($context, null, '', true)) { // TODO: use real pagseguro check.
     echo $OUTPUT->footer();
 
 } else {
+    $PAGE->set_context($context);
     $PAGE->set_url($destination);
     echo $OUTPUT->header();
     $a = new stdClass();

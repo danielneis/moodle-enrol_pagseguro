@@ -90,11 +90,6 @@ if ($submited) {
 function pagseguro_handle_transaction($transaction_data, $instanceid, $cid) {
     global $CFG,$USER,$DB,$course;
 
-    /// Read all the data from pagseguro and get it ready for later;
-    /// we expect only valid UTF-8 encoding, it is the responsibility
-    /// of user to set it up properly in pagseguro business account,
-    /// it is documented in docs wiki.
-
     $data = new stdClass();
 
     $transaction = array();
@@ -185,15 +180,11 @@ function pagseguro_handle_transaction($transaction_data, $instanceid, $cid) {
     }
 
     if (!in_array($data->status, array(COMMERCE_PAGSEGURO_STATUS_IN_ANALYSIS, COMMERCE_PAGSEGURO_STATUS_PAID, COMMERCE_PAGSEGURO_STATUS_AVAILABLE))) {
-        $plugin->unenrol_user($plugin_instance, $data->userid);
-        pagseguro_message_error_to_admin("Status not completed or pending. User unenrolled from course", $data);
-        redirect(new moodle_url('/enrol/pagseguro/return.php', array('id' => $courseid, 'waiting' => 1)));
+        #$plugin->unenrol_user($plugin_instance, $data->userid);
+        pagseguro_message_error_to_admin("Status not completed or pending.", $data);
+        #redirect(new moodle_url('/enrol/pagseguro/return.php', array('id' => $courseid, 'waiting' => 1)));
     }
 
-    /*if ($existing = $DB->get_record("enrol_pagseguro", array("txn_id" => $data->txn_id))) {   // Make sure this transaction doesn't exist already
-      pagseguro_message_error_to_admin("Transaction $data->txn_id is being repeated!", $data);
-      return false;
-      }*/
 
     $coursecontext = context_course::instance($course->id);
 
@@ -210,8 +201,12 @@ function pagseguro_handle_transaction($transaction_data, $instanceid, $cid) {
         return false;
     }
 
-    // All clear!
-    $DB->insert_record("enrol_pagseguro", $data);
+    if ($existing = $DB->get_record("enrol_pagseguro", array("code" => $data->code))) {
+        $data->id = $existing->id;
+        $DB->update_record("enrol_pagseguro", $data);
+    } else {
+        $DB->insert_record("enrol_pagseguro", $data);
+    }
 
     if ($plugin_instance->enrolperiod) {
         $timestart = time();
@@ -325,7 +320,7 @@ function pagseguro_message_error_to_admin($subject, $data) {
 }
 
 function pagseguro_handle_checkout($pagseguroWSBaseURL, $pagseguroBaseURL, $email, $token, $courseid, $plugin, $plugin_instance, $course) {
-    global $CFG;
+    global $CFG, $USER;
 
     $checkoutURL = $pagseguroWSBaseURL . '/v2/checkout/';
 
@@ -339,7 +334,7 @@ function pagseguro_handle_checkout($pagseguroWSBaseURL, $pagseguroBaseURL, $emai
     $encoding     = 'UTF-8';
     $currency     = $plugin->get_config('currency');
 
-    $redirect_url = $CFG->wwwroot.'/enrol/pagseguro/process.php?instanceid='.$plugin_instance->id;
+    $redirect_url = $CFG->wwwroot.'/enrol/pagseguro/process.php?instanceid='.$plugin_instance->id.'&amp;userid='.$USER->id;
 
     $url = $checkoutURL .'?email=' . urlencode($email) . "&token=" . $token;
 
