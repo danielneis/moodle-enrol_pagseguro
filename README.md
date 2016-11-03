@@ -31,6 +31,13 @@ Funcionalidades
 * Não é feita a desinscrição do usuário após devolução do dinheiro no PagSeguro.
 * A inscrição automática via boleto bancário ainda não está funcionando, mas será implementada na próxima versão.
 
+Sandbox
+-------
+
+Para utilizar ambiente de testes do PagSeguro (http://sandbox.pagseguro.uol.com.br/), inclua a seguinte linha no arquivo config.php do Moodle, antes da linha de include do setup.php:
+
+    $CFG->pagsegurousesandbox = true;
+    
 
 Dev Info
 --------
