@@ -16,7 +16,7 @@ Configuração
 ------------
 
 * Primeiro, você deve criar um Token no site do PagSeguro para utilizar o plugin.
-* Também no site do PagSeguro, você deve preencher a "URL de retorno Fixa" com a URL do seu site Moodle + o caminho para o script do plugin que processará o retorno. Deve ficar algo como: https://www.meumoodle.org/enrol/pagseguro/process.php
+* Também no site do PagSeguro, você deve preencher a "URL de retorno Fixa" com a URL do seu site Moodle + o caminho para o script do plugin que processará o retorno. Deve ficar algo como: https://www.meumoodle.org/enrol/pagseguro/process.php . ATENÇÃO: Este link é só um exemplo, você deve substituir "www.meumoodle.org" com a URL do seu Moodle.
 * Ainda no site do PagSeguro, você deve preencher o campo "Código de transação para página de redirecionamento" sem "transaction_id" (sem aspas).
 * Com o token criado, volte ao seu Moodle e habilite o plugin indo em "Bloco administração" > Administração do Site > Plugins > Inscrições > Gerenciar plugins de inscrições
 * Acesse o link das configurações do plugin PagSeguro
