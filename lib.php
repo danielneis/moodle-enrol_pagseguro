@@ -173,16 +173,12 @@ class enrol_pagseguro_plugin extends enrol_plugin {
         } else {
 
             if (isguestuser()) { // Force login only for guest user, not real users with guest role.
-                if (empty($CFG->loginhttps)) {
-                    $wwwroot = $CFG->wwwroot;
-                } else {
-                    // This actually is not so secure ;-), 'cause we're in unencrypted connection...
-                    $wwwroot = str_replace("http://", "https://", $CFG->wwwroot);
-                }
-                echo '<div class="mdl-align"><p>'.get_string('paymentrequired').'</p>';
-                echo '<p><b>'.get_string('cost').": $instance->currency $cost".'</b></p>';
-                echo '<p><a href="'.$wwwroot.'/login/">'.get_string('loginsite').'</a></p>';
-                echo '</div>';
+                echo '<div class="mdl-align">',
+                     '<p>',get_string('paymentrequired'),'</p>',
+                     '<p><b>',get_string('cost'),': ', $instance->currency, ' ', $cost,'</b></p>',
+                     '<p>',get_string('needsignuporlogin', 'enrol_pagseguro'),'</p>',
+                     '<p><a href="',moodle_url('/login'),'">',get_string('loginsite'),'</a></p>',
+                     '</div>';
             } else {
                 require_once("$CFG->dirroot/enrol/pagseguro/locallib.php");
                 // Sanitise some fields before building the pagseguro form.

@@ -48,6 +48,7 @@ $string['mailadmins'] = 'Notify admin';
 $string['mailstudents'] = 'Notify students';
 $string['mailteachers'] = 'Notify teachers';
 $string['messageprovider:pagseguro_enrolment'] = 'PagSeguro enrolment messages';
+$string['needsignuporlogin'] = 'You need to sign up or log in before make a payment.';
 $string['nocost'] = 'There is no cost associated with enrolling in this course!';
 $string['pagseguro:config'] = 'Configure PagSeguro enrol instances';
 $string['pagseguro:manage'] = 'Manage enrolled users';
