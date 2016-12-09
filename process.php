@@ -325,7 +325,7 @@ function pagseguro_handle_checkout($pagseguroWSBaseURL, $pagseguroBaseURL, $emai
     $checkoutURL = $pagseguroWSBaseURL . '/v2/checkout/';
 
     $item_id      = $courseid;
-    $item_desc    = empty($course->fullname) ? 'Curso moodle': $course->fullname;
+    $item_desc    = empty($course->fullname) ? 'Curso moodle' : mb_substr($course->fullname, 0, 100);
     $item_qty     = (int)1;
     $item_cost    = empty($plugin_instance->cost) ? 0.00 : number_format($plugin_instance->cost, 2);
     $item_cost    = str_replace(',', '', $item_cost);
