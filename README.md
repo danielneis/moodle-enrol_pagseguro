@@ -30,7 +30,7 @@ Funcionalidades
 * A inscrição é feita automaticamente no caso de pagamento via cartão de crétido.
 * Não é feita a desinscrição do usuário após devolução do dinheiro no PagSeguro.
 * A inscrição automática via boleto bancário ainda não está funcionando, mas será implementada na próxima versão.
-
+ 
 Sandbox
 -------
 
@@ -38,7 +38,12 @@ Para utilizar ambiente de testes do PagSeguro (http://sandbox.pagseguro.uol.com.
 
     $CFG->pagsegurousesandbox = true;
     
+Perguntas Frequentes
+--------------------
 
+* Ao tentar comprar o curso pelo PagSeguro, recebo a mensagem: "This host is not authorized to use PagSeguro API"
+ * Isso quer dizer que você não configurou o PagSeguro com a URL do seu ambiente Moodle. Você deve seguir os passos de configuração e preencher corretamente os campos no site do PagSeguro. Note que se você estiver usando o SandBox, deve cadastrar seu Moodle tambm no SandBox, pois são ambientes diferentes.
+ 
 Dev Info
 --------
 
