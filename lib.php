@@ -177,7 +177,7 @@ class enrol_pagseguro_plugin extends enrol_plugin {
                      '<p>',get_string('paymentrequired'),'</p>',
                      '<p><b>',get_string('cost'),': ', $instance->currency, ' ', $cost,'</b></p>',
                      '<p>',get_string('needsignuporlogin', 'enrol_pagseguro'),'</p>',
-                     '<p><a href="',moodle_url('/login'),'">',get_string('loginsite'),'</a></p>',
+                     '<p><a href="',new moodle_url('/login'),'">',get_string('loginsite'),'</a></p>',
                      '</div>';
             } else {
                 require_once("$CFG->dirroot/enrol/pagseguro/locallib.php");
