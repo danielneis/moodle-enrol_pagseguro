@@ -27,8 +27,12 @@
 require("../../config.php");
 require_once("$CFG->dirroot/enrol/pagseguro/lib.php");
 
-$id = required_param('id', PARAM_INT);
+$id = optional_param('id', 0, PARAM_INT);
 $error = optional_param('error', '', PARAM_ALPHANUM);
+
+if ($error == 'Unauthorized') {
+    print_error('unauthorized request on pagseguro');
+}
 
 if (!$course = $DB->get_record("course", array("id" => $id))) {
     redirect($CFG->wwwroot);

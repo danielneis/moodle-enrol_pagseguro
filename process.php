@@ -52,10 +52,6 @@ define('COMMERCE_PAYMENT_STATUS_PENDING', 'pending');
 
 $instanceid = optional_param('instanceid', 0, PARAM_INT);
 
-$plugin_instance = $DB->get_record("enrol", array("id" => $instanceid, "status" => 0));
-$courseid = $plugin_instance->courseid;
-$course = $DB->get_record('course', array('id' => $courseid));
-
 $submited = optional_param('submitbutton', '', PARAM_RAW);
 
 $notificationCode = optional_param('notificationCode', '', PARAM_RAW);
@@ -76,31 +72,33 @@ $token = $plugin->get_config('pagsegurotoken');
 
 if ($submited) {
 
+    $plugin_instance = $DB->get_record("enrol", array("id" => $instanceid, "status" => 0));
+    $courseid = $plugin_instance->courseid;
+    $course = $DB->get_record('course', array('id' => $courseid));
+
     pagseguro_handle_checkout($pagseguroWSBaseURL, $pagseguroBaseURL, $email, $token, $courseid, $plugin, $plugin_instance, $course);
 
 } else if ($transactionid) {
 
-    pagseguro_handle_redirect_back($pagseguroWSBaseURL, $transactionid, $email, $token, $courseid, $instanceid);
+    pagseguro_handle_redirect_back($pagseguroWSBaseURL, $transactionid, $email, $token);
 
 } else if (!empty($notificationCode)) {
 
     pagseguro_handle_old_notification_system($pagseguroWSBaseURL, $notificationCode, $email, $token, $courseid, $instanceid);
 }
 
-function pagseguro_handle_transaction($transaction_data, $instanceid, $cid) {
-    global $CFG,$USER,$DB,$course;
+function pagseguro_handle_transaction($transaction_data) {
+    global $CFG,$USER,$DB;
 
     $data = new stdClass();
 
-    $transaction = array();
-
     $plugin = enrol_get_plugin('pagseguro');
-
-    $userid   = (int) isset($USER->id) && !empty($USER->id) ? $USER->id : null;
-    $courseid = (int) isset($course->id) && !empty($course->id) ? $course->id : $cid;
 
     $transaction_xml = unserialize($transaction_data);
     $transaction = json_decode(json_encode(simplexml_load_string($transaction_xml)));
+
+    $courseid = $transaction->items->item->id;
+    $userid = $USER->id;
 
     if ($transaction) {
         foreach ($transaction as $trans_key => $trans_value) {
@@ -132,7 +130,7 @@ function pagseguro_handle_transaction($transaction_data, $instanceid, $cid) {
     $data->receiver_email   = $plugin->get_config('pagsegurobusiness');
     $data->userid           = $userid;
     $data->courseid         = $courseid;
-    $data->instanceid       = $instanceid;
+    $data->instanceid       = $DB->get_field('enrol', 'id', array('courseid' => $courseid, 'enrol' => 'pagseguro'));
     $data->timeupdated      = time();
 
     if(!isset($data->reference) && empty($data->reference)) {
@@ -375,7 +373,7 @@ function pagseguro_handle_checkout($pagseguroWSBaseURL, $pagseguroBaseURL, $emai
     header('Location: '. $pagseguroBaseURL . '/v2/checkout/payment.html?code='.$xml->code);
 }
 
-function pagseguro_handle_redirect_back($pagseguroBaseURL, $transactionid, $email, $token, $courseid, $instanceid) {
+function pagseguro_handle_redirect_back($pagseguroBaseURL, $transactionid, $email, $token) {
 
     $url = "{$pagseguroBaseURL}/v2/transactions/{$transactionid}?email={$email}&token={$token}";
 
@@ -386,10 +384,10 @@ function pagseguro_handle_redirect_back($pagseguroBaseURL, $transactionid, $emai
     curl_close($curl);
 
     if ($transaction == 'Unauthorized'){
-        redirect(new moodle_url('/enrol/pagseguro/return.php', array('id' => $courseid, 'error' => 'unauthorized')));
+        redirect(new moodle_url('/enrol/pagseguro/return.php', array('error' => 'unauthorized')));
     } else {
         $transaction_data  = serialize(trim($transaction));
-        pagseguro_handle_transaction($transaction_data, $instanceid, $courseid);
+        pagseguro_handle_transaction($transaction_data);
     }
 }
 
@@ -411,6 +409,6 @@ function pagseguro_handle_old_notification_system($pagseguroBaseURL, $notificati
         redirect(new moodle_url('/enrol/pagseguro/return.php', array('id' => $courseid, 'error' => 'unauthorized')));
     } else {
         $transaction_data  = serialize(trim($transaction));
-        pagseguro_handle_transaction($transaction_data, $instanceid, $courseid);
+        pagseguro_handle_transaction($transaction_data);
     }
 }
