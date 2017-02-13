@@ -84,7 +84,7 @@ if ($submited) {
 
 } else if (!empty($notificationCode)) {
 
-    pagseguro_handle_old_notification_system($pagseguroWSBaseURL, $notificationCode, $email, $token, $courseid, $instanceid);
+    pagseguro_handle_old_notification_system($pagseguroWSBaseURL, $notificationCode, $email, $token);
 }
 
 function pagseguro_handle_transaction($transaction_data) {
@@ -391,7 +391,7 @@ function pagseguro_handle_redirect_back($pagseguroBaseURL, $transactionid, $emai
     }
 }
 
-function pagseguro_handle_old_notification_system($pagseguroBaseURL, $notificationCode, $email, $token, $courseid, $instanceid) {
+function pagseguro_handle_old_notification_system($pagseguroBaseURL, $notificationCode, $email, $token) {
 
     $transactionsv2URL = $pagseguroBaseURL .'/v2/transactions/notifications/';
 
