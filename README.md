@@ -1,7 +1,7 @@
 Plugin de inscrição via PagSeguro para o Moodle
 -----------------------------------------------
 
-Este plugin de inscrição permita que você venda seus cursos no Moodle e receba pelo PagSeguro.
+Este plugin de inscrição permite que você venda seus cursos no Moodle atravpes do PagSeguro.
 
 Também disponível em https://moodle.org/plugins/enrol_pagseguro
 
