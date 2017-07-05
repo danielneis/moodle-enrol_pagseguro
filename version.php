@@ -27,8 +27,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2017020800;
-$plugin->requires  = 2015111600;
-$plugin->release   = '12';
+$plugin->version   = 2017070500;
+$plugin->requires  = 2013051401;
+$plugin->release   = '13';
 $plugin->component = 'enrol_pagseguro';
 $plugin->maturity  = MATURITY_STABLE;

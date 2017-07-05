@@ -177,8 +177,11 @@ function pagseguro_handle_transaction($transaction_data) {
             break;
     }
 
-    if (!in_array($data->status, array(COMMERCE_PAGSEGURO_STATUS_IN_ANALYSIS, COMMERCE_PAGSEGURO_STATUS_PAID, COMMERCE_PAGSEGURO_STATUS_AVAILABLE))) {
-        #$plugin->unenrol_user($plugin_instance, $data->userid);
+    if (!in_array($data->status,
+                   array(COMMERCE_PAGSEGURO_STATUS_AWAITING,
+                         COMMERCE_PAGSEGURO_STATUS_IN_ANALYSIS,
+                         COMMERCE_PAGSEGURO_STATUS_PAID,
+                         COMMERCE_PAGSEGURO_STATUS_AVAILABLE))) {
         pagseguro_message_error_to_admin("Status not completed or pending.", $data);
         redirect(new moodle_url('/enrol/pagseguro/return.php', array('id' => $courseid, 'waiting' => 1)));
     }
