@@ -29,7 +29,7 @@ Funcionalidades
 * Para cada curso Moodle, você pode configura o valor que o usuário deve pagar para se inscrever.
 * A inscrição é feita automaticamente no caso de pagamento via cartão de crétido.
 * Não é feita a desinscrição do usuário após devolução do dinheiro no PagSeguro.
-* A inscrição automática via boleto bancário ainda não está funcionando, mas será implementada na próxima versão.
+* A inscrição automática via boleto bancário é feita quando o boleto é gerado. Não é validada a compensação do boleto, de forma que o usurio deve ser desinscrito manualmente caso no pague o boleto.
  
 Sandbox
 -------
