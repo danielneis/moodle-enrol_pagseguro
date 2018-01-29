@@ -2,7 +2,7 @@
     "name": "danielneis/moodle-enrol_pagseguro",
     "description": "An enrolment plugin for Moodle that allows you to set up paid courses with PagSeguro.",
     "type": "moodle-enrol",
-    "license": "GPLv3",
+    "license": "GPL-3.0-or-later",
     "authors": [
         {
             "name": "Nitin Agrawal"
