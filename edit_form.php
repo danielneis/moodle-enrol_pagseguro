@@ -61,6 +61,19 @@ class enrol_pagseguro_edit_form extends moodleform {
         $mform->addElement('select', 'roleid', get_string('assignrole', 'enrol_pagseguro'), $roles);
         $mform->setDefault('roleid', $plugin->get_config('roleid'));
 
+        // INICIO - Mods para recorrencia
+        $recurrencyOptions = array(
+            'WEEKLY' => "Semanal", 
+            'MONTHLY' => "Mensal",
+            'BIMONTHLY' => "Bimestral",
+            'TRIMONTHLY' => "Trimestral",
+            'SEMIANNUALLY' => "Semestral",
+            'YEARLY' => "Anual",
+            'none' => "Não Recorrente" 
+        );
+        $mform->addElement('select', 'recurrency', get_string('recurrency', 'enrol_pagseguro'), $recurrencyOptions);
+        // FIM - Mods para recorrencia
+        
         $mform->addElement('duration', 'enrolperiod', get_string('enrolperiod', 'enrol_pagseguro'), array('optional' => true, 'defaultunit' => 86400));
         $mform->setDefault('enrolperiod', $plugin->get_config('enrolperiod'));
         $mform->addHelpButton('enrolperiod', 'enrolperiod', 'enrol_pagseguro');
