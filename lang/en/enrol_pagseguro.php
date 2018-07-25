@@ -62,3 +62,14 @@ $string['sendpaymentbutton'] = 'Send payment via PagSeguro';
 $string['status'] = 'Allow PagSeguro enrolments';
 $string['status_desc'] = 'Allow users to use PagSeguro to enrol into a course by default.';
 $string['unenrolselfconfirm'] = 'Do you really want to unenrol yourself from course "{$a}"?';
+
+
+$string['WEEKLY'] = "weekly"; 
+$string['MONTHLY'] = "monthly";
+$string['BIMONTHLY'] = "bimonthly";
+$string['TRIMONTHLY'] = "trimonthly";
+$string['SEMIANNUALLY'] = "semiannually";
+$string['YEARLY'] = "yearly";
+
+$string['recurrency'] = "Recurrency";
+$string['paymentrequiredrecurrency'] = 'You must make a {$a->recurrency} payment of {$a->currency} {$a->cost} via PagSeguro to access this course.';

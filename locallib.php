@@ -36,10 +36,19 @@ class enrol_pagseguro_enrol_form extends moodleform {
 
         $heading = $plugin->get_instance_name($instance);
         $mform->addElement('header', 'pagseguroheader', $heading);
+        $recurrency = false;
+        if(!empty($instance->customchar1) && $instance->customchar1 != "none"){
+            $string = 'paymentrequiredrecurrency';
+            $recurrency = true;
+            $instance->recurrency = get_string($instance->customchar1, 'enrol_pagseguro');
+        }else{
+            $string = 'paymentrequired';
+        }
 
-        $mform->addElement('static', 'paymentrequired', '', get_string('paymentrequired', 'enrol_pagseguro', $instance));
+        $mform->addElement('static', 'paymentrequired', '', get_string($string, 'enrol_pagseguro', $instance));
 
-        $pagseguroimgurl = "https://p.simg.uol.com.br/out/pagseguro/i/botoes/pagamentos/99x61-pagar-assina.gif";
+        $pagseguroimgurl = $recurrency ? "https://stc.pagseguro.uol.com.br/public/img/botoes/assinaturas/95x45-assinar.gif" :
+            "https://p.simg.uol.com.br/out/pagseguro/i/botoes/pagamentos/99x61-pagar-assina.gif";
         $mform->addElement('static', 'paymentrequired', '',
                            html_writer::empty_tag('img', array('alt' => get_string('pagseguroaccepted', 'enrol_pagseguro'),
                                                                'src' => $pagseguroimgurl)));
