@@ -37,6 +37,9 @@ require_once "lib.php";
 require_once "./vendor/autoload.php";
 require_once $CFG->libdir . '/eventslib.php';
 require_once $CFG->libdir . '/enrollib.php';
+require_once "./pagseguro_enrol.php";
+require_once "./pagseguro_transaction_recurrency.php";
+
 
 define('COMMERCE_PAGSEGURO_STATUS_AWAITING', 1);
 define('COMMERCE_PAGSEGURO_STATUS_IN_ANALYSIS', 2);
@@ -219,92 +222,12 @@ function pagseguro_handle_transaction($transaction_data)
         $DB->insert_record("enrol_pagseguro", $data);
     }
 
-    if ($plugin_instance->enrolperiod) {
-        $timestart = time();
-        $timeend = $timestart + $plugin_instance->enrolperiod;
-    } else {
-        $timestart = 0;
-        $timeend = 0;
-    }
-
-    // Enrol user
-    $plugin->enrol_user($plugin_instance, $userid, $plugin_instance->roleid, $timestart, $timeend);
-
-    // Pass $view=true to filter hidden caps if the user cannot see them
-    if ($users = get_users_by_capability($context, 'moodle/course:update', 'u.*', 'u.id ASC',
-        '', '', '', '', false, true)) {
-        $users = sort_by_roleassignment_authority($users, $context);
-        $teacher = array_shift($users);
-    } else {
-        $teacher = get_admin();
-    }
-
-    $mailstudents = $plugin->get_config('mailstudents');
-    $mailteachers = $plugin->get_config('mailteachers');
-    $mailadmins = $plugin->get_config('mailadmins');
-    $shortname = format_string($course->shortname, true, array('context' => $context));
-
-    if (!empty($mailstudents)) {
-        $a = new stdClass();
-        $a->coursename = format_string($course->fullname, true, array('context' => $coursecontext));
-        $a->profileurl = new moodle_url('/user/view.php', array('id' => $user->id));
-
-        $eventdata = new stdClass();
-        $eventdata->modulename = 'moodle';
-        $eventdata->component = 'enrol_pagseguro';
-        $eventdata->name = 'pagseguro_enrolment';
-        $eventdata->userfrom = $teacher;
-        $eventdata->userto = $user;
-        $eventdata->subject = get_string("enrolmentnew", 'enrol', $shortname);
-        $eventdata->fullmessage = get_string('welcometocoursetext', '', $a);
-        $eventdata->fullmessageformat = FORMAT_PLAIN;
-        $eventdata->fullmessagehtml = '';
-        $eventdata->smallmessage = '';
-        message_send($eventdata);
-    }
-
-    if (!empty($mailteachers)) {
-        $a = new stdClass();
-        $a->course = format_string($course->fullname, true, array('context' => $coursecontext));
-        $a->user = fullname($user);
-
-        $eventdata = new stdClass();
-        $eventdata->modulename = 'moodle';
-        $eventdata->component = 'enrol_pagseguro';
-        $eventdata->name = 'pagseguro_enrolment';
-        $eventdata->userfrom = $user;
-        $eventdata->userto = $teacher;
-        $eventdata->subject = get_string("enrolmentnew", 'enrol', $shortname);
-        $eventdata->fullmessage = get_string('enrolmentnewuser', 'enrol', $a);
-        $eventdata->fullmessageformat = FORMAT_PLAIN;
-        $eventdata->fullmessagehtml = '';
-        $eventdata->smallmessage = '';
-        message_send($eventdata);
-    }
-
-    if (!empty($mailadmins)) {
-        $a = new stdClass();
-        $a->course = format_string($course->fullname, true, array('context' => $coursecontext));
-        $a->user = fullname($user);
-        $admins = get_admins();
-        foreach ($admins as $admin) {
-            $eventdata = new stdClass();
-            $eventdata->modulename = 'moodle';
-            $eventdata->component = 'enrol_pagseguro';
-            $eventdata->name = 'pagseguro_enrolment';
-            $eventdata->userfrom = $user;
-            $eventdata->userto = $admin;
-            $eventdata->subject = get_string("enrolmentnew", 'enrol', $shortname);
-            $eventdata->fullmessage = get_string('enrolmentnewuser', 'enrol', $a);
-            $eventdata->fullmessageformat = FORMAT_PLAIN;
-            $eventdata->fullmessagehtml = '';
-            $eventdata->smallmessage = '';
-
-            message_send($eventdata);
-        }
-    }
-
-    redirect(new moodle_url('/enrol/pagseguro/return.php', array('id' => $courseid)));
+    pagseguro_enrol_redirect_and_notify($plugin_instance,
+                                     $userid,
+                                     $user, 
+                                     $course, 
+                                     $coursecontext,
+                                     $context);
 }
 
 function pagseguro_message_error_to_admin($subject, $data)
@@ -385,7 +308,10 @@ function pagseguro_handle_checkout_recurrency($redirect_url, $item, $pagseguroWS
     $preApprovalRequest->setPreApprovalName($item->item_desc);
     $preApprovalRequest->setPreApprovalAmountPerPayment($item->item_amount);
     $preApprovalRequest->setPreApprovalPeriod($plugin_instance->customchar1);
-    $preApprovalRequest->setRedirectURL('http://942f99c7.ngrok.io' . '/enrol/pagseguro/process.php?instanceid=' . $plugin_instance->id . '&userid=' . $USER->id);
+    $preApprovalRequest->setRedirectURL('http://942f99c7.ngrok.io' .
+     '/enrol/pagseguro/process.php?instanceid=' . $plugin_instance->id .
+                                   '&userid=' . $USER->id .
+                                   '&courseid=' . $item->item_id);
     $preApprovalRequest->setReviewURL('');
     try {
         $credentials = new PagSeguroAccountCredentials($email,
@@ -422,16 +348,10 @@ function pagseguro_handle_checkout($pagseguroWSBaseURL, $pagseguroBaseURL, $emai
     } else {
         pagseguro_handle_checkout_recurrency($redirect_url, $item, $pagseguroWSBaseURL, $pagseguroBaseURL, $email, $token, $courseid, $plugin, $plugin_instance, $course);
     }
-
-    // if (count($xml->error) > 0) {
-    //     #print_error(var_export($xml->error, true));
-    //     redirect(new moodle_url('/enrol/pagseguro/return.php', array('id' => $courseid, 'error' => 'generic')));
-    // }
-
-    // header('Location: '. $pagseguroBaseURL . '/v2/checkout/payment.html?code='.$xml->code);
 }
 
 function pagseguro_handle_redirect_back_recurrency($pagseguroBaseURL, $code, $email, $token){
+    global $USER;
     try {
         $credentials = new PagSeguroAccountCredentials($email,
             $token);
@@ -441,8 +361,7 @@ function pagseguro_handle_redirect_back_recurrency($pagseguroBaseURL, $code, $em
         if ($result->getStatus()->getValue() > 2) {
             redirect(new moodle_url('/enrol/pagseguro/return.php', array('error' => 'unauthorized')));
         } else {
-            // $transaction_data = serialize(trim($transaction));
-            // pagseguro_handle_transaction($transaction_data);
+            handle_transaction_recurrency($courseid, $USER->id, $result);
         }
     } catch (PagSeguroServiceException $e) {
         redirect(new moodle_url('/enrol/pagseguro/return.php', array('error' => 'unauthorized')));
