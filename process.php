@@ -59,6 +59,8 @@ $notificationCode = optional_param('notificationCode', '', PARAM_RAW);
 
 $transactionid = optional_param('transaction_id', '', PARAM_RAW);
 
+$recurrencyCode = optional_param('code', '', PARAM_RAW);
+
 if (isset($CFG->pagsegurousesandbox)) {
     $pagseguroBaseURL = 'https://sandbox.pagseguro.uol.com.br';
     $pagseguroWSBaseURL = 'https://ws.sandbox.pagseguro.uol.com.br';
@@ -87,7 +89,10 @@ if ($submited) {
 
     pagseguro_handle_redirect_back($pagseguroWSBaseURL, $transactionid, $email, $token);
 
-} else if (!empty($notificationCode)) {
+} else if ($recurrencyCode){
+    pagseguro_handle_redirect_back_recurrency($pagseguroWSBaseURL, $recurrencyCode, $email, $token);
+
+}else if (!empty($notificationCode)) {
 
     pagseguro_handle_old_notification_system($pagseguroWSBaseURL, $notificationCode, $email, $token);
 }
@@ -426,6 +431,23 @@ function pagseguro_handle_checkout($pagseguroWSBaseURL, $pagseguroBaseURL, $emai
     // header('Location: '. $pagseguroBaseURL . '/v2/checkout/payment.html?code='.$xml->code);
 }
 
+function pagseguro_handle_redirect_back_recurrency($pagseguroBaseURL, $code, $email, $token){
+    try {
+        $credentials = new PagSeguroAccountCredentials($email,
+            $token);
+        $result = PagSeguroPreApprovalSearchService::searchByCode($credentials, $code);
+        $result->getStatus()->getTypeFromValue();
+        //cancelado
+        if ($result->getStatus()->getValue() > 2) {
+            redirect(new moodle_url('/enrol/pagseguro/return.php', array('error' => 'unauthorized')));
+        } else {
+            // $transaction_data = serialize(trim($transaction));
+            // pagseguro_handle_transaction($transaction_data);
+        }
+    } catch (PagSeguroServiceException $e) {
+        redirect(new moodle_url('/enrol/pagseguro/return.php', array('error' => 'unauthorized')));
+    }
+}
 function pagseguro_handle_redirect_back($pagseguroBaseURL, $transactionid, $email, $token)
 {
 
