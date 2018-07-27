@@ -31,7 +31,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-header("access-control-allow-origin: https://ws.pagseguro.uol.com.br");
+header("access-control-allow-origin: https://sandbox.pagseguro.uol.com.br");
+// header("access-control-allow-origin: https://ws.pagseguro.uol.com.br");
 require '../../config.php';
 require_once "lib.php";
 require_once "./vendor/autoload.php";
@@ -59,6 +60,7 @@ $instanceid = optional_param('instanceid', 0, PARAM_INT);
 $submited = optional_param('submitbutton', '', PARAM_RAW);
 
 $notificationCode = optional_param('notificationCode', '', PARAM_RAW);
+$notificationType = optional_param('notificationType', '', PARAM_RAW);
 
 $transactionid = optional_param('transaction_id', '', PARAM_RAW);
 
@@ -96,8 +98,11 @@ if ($submited) {
     pagseguro_handle_redirect_back_recurrency($pagseguroWSBaseURL, $recurrencyCode, $email, $token);
 
 }else if (!empty($notificationCode)) {
-
-    pagseguro_handle_old_notification_system($pagseguroWSBaseURL, $notificationCode, $email, $token);
+    if($notificationType === 'preApproval'){
+        pagseguro_handle_notification_system_recurrency($pagseguroBaseURL, $notificationCode, $email, $token);
+    }else{
+        pagseguro_handle_old_notification_system($pagseguroWSBaseURL, $notificationCode, $email, $token);
+    }
 }
 
 function pagseguro_handle_transaction($transaction_data)
@@ -300,7 +305,7 @@ function pagseguro_handle_checkout_recurrency($redirect_url, $item, $pagseguroWS
 
     $preApprovalRequest = new PagSeguroPreApprovalRequest();
     $preApprovalRequest->setCurrency($item->currency);
-    $preApprovalRequest->setReference($item->item_id);
+    $preApprovalRequest->setReference($item->item_id . '_' . $USER->id);
     /***
      * Pre Approval information
      */
@@ -361,7 +366,9 @@ function pagseguro_handle_redirect_back_recurrency($pagseguroBaseURL, $code, $em
         if ($result->getStatus()->getValue() > 2) {
             redirect(new moodle_url('/enrol/pagseguro/return.php', array('error' => 'unauthorized')));
         } else {
-            handle_transaction_recurrency($courseid, $USER->id, $result);
+            $userIdFromReference = explode("_", $result->getReference())[1];
+            $courseIdFromReference = explode("_", $result->getReference())[0];
+            handle_transaction_recurrency($courseIdFromReference, $userIdFromReference, $result);
         }
     } catch (PagSeguroServiceException $e) {
         redirect(new moodle_url('/enrol/pagseguro/return.php', array('error' => 'unauthorized')));
@@ -406,5 +413,27 @@ function pagseguro_handle_old_notification_system($pagseguroBaseURL, $notificati
     } else {
         $transaction_data = serialize(trim($transaction));
         pagseguro_handle_transaction($transaction_data);
+    }
+}
+function pagseguro_handle_notification_system_recurrency($pagseguroBaseURL, $notificationCode, $email, $token)
+{
+    global $DB;
+    try {
+        $credentials = new PagSeguroAccountCredentials($email,
+            $token);
+        $result = PagSeguroPreApprovalSearchService::findByNotification($credentials, $notificationCode);
+        $userIdFromReference = explode("_", $result->getReference())[1];
+        $courseIdFromReference = explode("_", $result->getReference())[0];
+
+        //cancelado
+        if ($result->getStatus()->getValue() > 2) {
+            $plugin = enrol_get_plugin('pagseguro');
+            $instance = $DB->get_record('enrol', array('courseid' => $courseIdFromReference, 'enrol' => 'pagseguro'));
+            $plugin->unenrol_user($instance, $userIdFromReference);
+        } else {
+            handle_transaction_recurrency($courseIdFromReference, $userIdFromReference, $result);
+        }
+    } catch (PagSeguroServiceException $e) {
+        redirect(new moodle_url('/enrol/pagseguro/return.php', array('error' => 'unauthorized')));
     }
 }

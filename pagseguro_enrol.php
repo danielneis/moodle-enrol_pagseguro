@@ -92,7 +92,6 @@ function pagseguro_enrol_redirect_and_notify($plugin_instance,
             message_send($eventdata);
         }
     }
-
-    redirect(new moodle_url('/enrol/pagseguro/return.php', array('id' => $courseid)));
+    redirect(new moodle_url('/enrol/pagseguro/return.php', array('id' => $course->id)));
 
 }

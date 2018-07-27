@@ -73,3 +73,14 @@ $string['YEARLY'] = "yearly";
 
 $string['recurrency'] = "Recurrency";
 $string['paymentrequiredrecurrency'] = 'You must make a {$a->recurrency} payment of {$a->currency} {$a->cost} via PagSeguro to access this course.';
+
+
+$string['WEEKLY'] = "semanal";
+$string['MONTHLY'] = "mensal";
+$string['BIMONTHLY'] = "bimestral";
+$string['TRIMONTHLY'] = "trimestral";
+$string['SEMIANNUALLY'] = "semestral";
+$string['YEARLY'] = "anual";
+
+$string['recurrency'] = "Recorrência";
+$string['paymentrequiredrecurrency'] = 'Você deve fazer um pagamento {$a->recurrency} no valor de {$a->currency} {$a->cost} via PagSeguro para acessar esse curso.';
