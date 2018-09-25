@@ -56,7 +56,7 @@ if ($instanceid) {
     $instance->id       = null;
     $instance->courseid = $course->id;
 }
-
+$instance->recurrency = $instance->customchar1;
 $mform = new enrol_pagseguro_edit_form(null, array($instance, $plugin, $context));
 
 if ($mform->is_cancelled()) {
@@ -75,6 +75,8 @@ if ($mform->is_cancelled()) {
         $instance->enrolperiod    = $data->enrolperiod;
         $instance->enrolstartdate = $data->enrolstartdate;
         $instance->enrolenddate   = $data->enrolenddate;
+        
+        $instance->customchar1   = $data->recurrency;
         $instance->timemodified   = time();
         $DB->update_record('enrol', $instance);
 
@@ -86,6 +88,7 @@ if ($mform->is_cancelled()) {
         $fields = array('status' => $data->status, 'name' => $data->name, 'cost' => $data->cost,
                         'currency' => $data->currency, 'roleid' => $data->roleid,
                         'enrolperiod' => $data->enrolperiod, 'enrolstartdate' => $data->enrolstartdate,
+                        'customchar1' => $data->recurrency,
                         'enrolenddate' => $data->enrolenddate);
         $plugin->add_instance($course, $fields);
     }

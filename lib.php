@@ -173,9 +173,13 @@ class enrol_pagseguro_plugin extends enrol_plugin {
         } else {
 
             if (isguestuser()) { // Force login only for guest user, not real users with guest role.
+                $costString = $instance->currency . ' ' . $cost;
+                if(!empty($instance->customchar1) && $instance->customchar1 != "none"){
+                    $costString .= ' '. get_string($instance->customchar1, 'enrol_pagseguro');
+                }
                 echo '<div class="mdl-align">',
                      '<p>',get_string('paymentrequired'),'</p>',
-                     '<p><b>',get_string('cost'),': ', $instance->currency, ' ', $cost,'</b></p>',
+                     '<p><b>',get_string('cost'),': ', $costString,'</b></p>',
                      '<p>',get_string('needsignuporlogin', 'enrol_pagseguro'),'</p>',
                      '<p><a href="',new moodle_url('/login'),'">',get_string('loginsite'),'</a></p>',
                      '</div>';

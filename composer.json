@@ -16,7 +16,8 @@
         }
     ],
     "require": {
-        "composer/installers": "*"
+        "composer/installers": "*",
+        "pagseguro/php": "@stable"
     },
     "extra": {
         "installer-name": "pagseguro"
