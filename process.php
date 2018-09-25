@@ -259,7 +259,7 @@ function pagseguro_message_error_to_admin($subject, $data)
     message_send($eventdata);
 }
 
-function pagseguro_handle_checkout_no_recurrency($redirect_url, $item, $pagseguroWSBaseURL, $pagseguroBaseURL, $email, $token, $courseid, $plugin, $plugin_instance, $course)
+function pagseguro_handle_checkout_no_recurrency($checkoutURL, $redirect_url, $item, $pagseguroWSBaseURL, $pagseguroBaseURL, $email, $token, $courseid, $plugin, $plugin_instance, $course)
 {
     $url = $checkoutURL . '?email=' . urlencode($email) . "&token=" . $token;
     $encoding = 'UTF-8';
@@ -313,7 +313,14 @@ function pagseguro_handle_checkout_recurrency($redirect_url, $item, $pagseguroWS
     $preApprovalRequest->setPreApprovalName($item->item_desc);
     $preApprovalRequest->setPreApprovalAmountPerPayment($item->item_amount);
     $preApprovalRequest->setPreApprovalPeriod($plugin_instance->customchar1);
-    $preApprovalRequest->setRedirectURL('http://942f99c7.ngrok.io' .
+    if ($plugin_instance->enrolperiod) {
+        $finalDate = new DateTime();
+        //enrolperiod is in seconds
+        $days = $plugin_instance->enrolperiod / 86400;
+        $finalDate->modify('+'. $days . ' days');
+        $preApprovalRequest->setPreApprovalFinalDate($finalDate->format('c'));
+    }
+    $preApprovalRequest->setRedirectURL($CFG->wwwroot .
      '/enrol/pagseguro/process.php?instanceid=' . $plugin_instance->id .
                                    '&userid=' . $USER->id .
                                    '&courseid=' . $item->item_id);
@@ -349,7 +356,7 @@ function pagseguro_handle_checkout($pagseguroWSBaseURL, $pagseguroBaseURL, $emai
     $redirect_url = $CFG->wwwroot . '/enrol/pagseguro/process.php?instanceid=' . $plugin_instance->id . '&amp;userid=' . $USER->id;
 
     if (empty($plugin_instance->customchar1) || $plugin_instance->customchar1 == 'none') {
-        pagseguro_handle_checkout_no_recurrency($redirect_url, $item, $pagseguroWSBaseURL, $pagseguroBaseURL, $email, $token, $courseid, $plugin, $plugin_instance, $course);
+        pagseguro_handle_checkout_no_recurrency($checkoutURL, $redirect_url, $item, $pagseguroWSBaseURL, $pagseguroBaseURL, $email, $token, $courseid, $plugin, $plugin_instance, $course);
     } else {
         pagseguro_handle_checkout_recurrency($redirect_url, $item, $pagseguroWSBaseURL, $pagseguroBaseURL, $email, $token, $courseid, $plugin, $plugin_instance, $course);
     }
