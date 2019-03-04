@@ -34,7 +34,6 @@
 //header("access-control-allow-origin: https://ws.pagseguro.uol.com.br");
 require('../../config.php');
 require_once("lib.php");
-require_once($CFG->libdir.'/eventslib.php');
 require_once($CFG->libdir.'/enrollib.php');
 
 define('COMMERCE_PAGSEGURO_STATUS_AWAITING', 1);
