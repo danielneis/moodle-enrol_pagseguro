@@ -299,23 +299,25 @@ function pagseguro_handle_transaction($transaction_data) {
 function pagseguro_message_error_to_admin($subject, $data) {
 
     $admin = get_admin();
+    $userfrom = \core_user::get_noreply_user();
     $site = get_site();
 
     $message = "$site->fullname:  Transaction failed.\n\n$subject\n\n";
 
     $message .= serialize($data);
 
-    $eventdata = new stdClass();
-    $eventdata->modulename        = 'moodle';
+    $eventdata = new \core\message\message();
+    $eventdata->courseid          = SITEID;
     $eventdata->component         = 'enrol_pagseguro';
     $eventdata->name              = 'pagseguro_enrolment';
-    $eventdata->userfrom          = $admin;
+    $eventdata->userfrom          = $userfrom;
     $eventdata->userto            = $admin;
+    $eventdata->notification      = 1;
     $eventdata->subject           = "pagseguro ERROR: ".$subject;
     $eventdata->fullmessage       = $message;
     $eventdata->fullmessageformat = FORMAT_PLAIN;
     $eventdata->fullmessagehtml   = '';
-    $eventdata->smallmessage      = '';
+    $eventdata->smallmessage      = $subject;
     message_send($eventdata);
 }
 
