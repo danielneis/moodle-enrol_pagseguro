@@ -238,8 +238,7 @@ function pagseguro_handle_transaction($transaction_data) {
         $a->coursename = format_string($course->fullname, true, array('context' => $coursecontext));
         $a->profileurl = new moodle_url('/user/view.php', array('id' => $user->id));
 
-        $eventdata = new stdClass();
-        $eventdata->modulename        = 'moodle';
+        $eventdata = new \core\message\message();
         $eventdata->component         = 'enrol_pagseguro';
         $eventdata->name              = 'pagseguro_enrolment';
         $eventdata->userfrom          = $teacher;
@@ -257,8 +256,7 @@ function pagseguro_handle_transaction($transaction_data) {
         $a->course = format_string($course->fullname, true, array('context' => $coursecontext));
         $a->user = fullname($user);
 
-        $eventdata = new stdClass();
-        $eventdata->modulename        = 'moodle';
+        $eventdata = new \core\message\message();
         $eventdata->component         = 'enrol_pagseguro';
         $eventdata->name              = 'pagseguro_enrolment';
         $eventdata->userfrom          = $user;
@@ -277,8 +275,7 @@ function pagseguro_handle_transaction($transaction_data) {
         $a->user = fullname($user);
         $admins = get_admins();
         foreach ($admins as $admin) {
-            $eventdata = new stdClass();
-            $eventdata->modulename        = 'moodle';
+            $eventdata = new \core\message\message();
             $eventdata->component         = 'enrol_pagseguro';
             $eventdata->name              = 'pagseguro_enrolment';
             $eventdata->userfrom          = $user;
