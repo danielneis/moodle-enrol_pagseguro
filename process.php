@@ -294,6 +294,7 @@ function pagseguro_handle_transaction($transaction_data) {
 }
 
 function pagseguro_message_error_to_admin($subject, $data) {
+    global $USER;
 
     $admin = get_admin();
     $userfrom = \core_user::get_noreply_user();
@@ -311,7 +312,7 @@ function pagseguro_message_error_to_admin($subject, $data) {
     $eventdata->userto            = $admin;
     $eventdata->notification      = 1;
     $eventdata->subject           = "pagseguro ERROR: ".$subject;
-    $eventdata->fullmessage       = $message;
+    $eventdata->fullmessage       = $message . ' -- current USER->id =' . $USER->id;
     $eventdata->fullmessageformat = FORMAT_PLAIN;
     $eventdata->fullmessagehtml   = '';
     $eventdata->smallmessage      = $subject;
