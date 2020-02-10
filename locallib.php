@@ -39,6 +39,7 @@ class enrol_pagseguro_enrol_form extends moodleform {
 
         $instance->currency = get_string($instance->currency, 'currencies');
         $instance->cost = number_format((float)$instance->cost, 2, get_string('decsep', 'langconfig'), '');
+
         $mform->addElement('static', 'paymentrequired', '', get_string('paymentrequired', 'enrol_pagseguro', $instance));
 
         $pagseguroimgurl = "https://p.simg.uol.com.br/out/pagseguro/i/botoes/pagamentos/99x61-pagar-assina.gif";

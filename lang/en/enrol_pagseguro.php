@@ -24,6 +24,8 @@
  */
 
 $string['assignrole'] = 'Assign role';
+$string['automaticenrolboleto'] = 'PagSeguro Automatic enrol bill';
+$string['automaticenrolboleto_desc'] = 'Automatic enrol by payment of bill';
 $string['businessemail'] = 'PagSeguro business email';
 $string['businessemail_desc'] = 'The email address of your business PagSeguro account';
 $string['businesstoken'] = 'PagSeguro business token';
