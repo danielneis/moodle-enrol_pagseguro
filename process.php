@@ -223,7 +223,8 @@ function pagseguro_handle_transaction($transaction_xml, $redirect = true) {
     } else if (in_array($data->status, $unenrolstatuses)) {
 
         $plugin->update_user_enrol($plugin_instance, $userid, ENROL_USER_SUSPENDED);
-        $plugin->
+    // unenrol_user é uma função do /enrol/guest/lib.php, mas quero chamar a do /lib/enrollib.php
+        $plugin->unenrol_user($plugin_instance, $userid);
         return;
 
     } else {
