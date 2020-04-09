@@ -223,6 +223,7 @@ function pagseguro_handle_transaction($transaction_xml, $redirect = true) {
     } else if (in_array($data->status, $unenrolstatuses)) {
 
         $plugin->update_user_enrol($plugin_instance, $userid, ENROL_USER_SUSPENDED);
+        $plugin->
         return;
 
     } else {
