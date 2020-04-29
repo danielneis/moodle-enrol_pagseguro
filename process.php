@@ -234,14 +234,12 @@ function pagseguro_handle_transaction($transaction_xml, $redirect = true) {
     }
 
     // Pass $view=true to filter hidden caps if the user cannot see them
-    if ($users = get_users_by_capability($context, 'moodle/course:update', 'u.*', 'u.id ASC',
-                '', '', '', '', false, true)) {
-        $users = sort_by_roleassignment_authority($users, $context);
-        $teacher = array_shift($users);
-    } else {
-        $teacher = get_admin();
+    $teachers = get_users_by_capability($context, 'moodle/course:update',
+        'u.id,u.email,u.username,'. get_all_user_name_fields(true, 'u'), 'u.id ASC', '', '', '', '', false, true);
+    if($teachers) {
+       $teachers= sort_by_roleassignment_authority($teachers, $context);
     }
-
+    
     $mailstudents = $plugin->get_config('mailstudents');
     $mailteachers = $plugin->get_config('mailteachers');
     $mailadmins   = $plugin->get_config('mailadmins');
@@ -252,10 +250,16 @@ function pagseguro_handle_transaction($transaction_xml, $redirect = true) {
         $a->coursename = format_string($course->fullname, true, array('context' => $coursecontext));
         $a->profileurl = new moodle_url('/user/view.php', array('id' => $user->id));
 
+        if ($plugin->get_config('mailfromsupport') == 1) {
+            $userfrom = get_support_user();
+        }else {
+           $userfrom = array_shift($teachers);
+        }
+        
         $eventdata = new \core\message\message();
         $eventdata->component         = 'enrol_pagseguro';
         $eventdata->name              = 'pagseguro_enrolment';
-        $eventdata->userfrom          = $teacher;
+        $eventdata->userfrom          = $userfrom;
         $eventdata->userto            = $user;
         $eventdata->subject           = get_string("enrolmentnew", 'enrol', $shortname);
         $eventdata->fullmessage       = get_string('welcometocoursetext', '', $a);
@@ -265,22 +269,24 @@ function pagseguro_handle_transaction($transaction_xml, $redirect = true) {
         message_send($eventdata);
     }
 
-    if (!empty($mailteachers)) {
+    if (!empty($mailteachers) && isset($teachers)) {
         $a = new stdClass();
         $a->course = format_string($course->fullname, true, array('context' => $coursecontext));
         $a->user = fullname($user);
 
-        $eventdata = new \core\message\message();
-        $eventdata->component         = 'enrol_pagseguro';
-        $eventdata->name              = 'pagseguro_enrolment';
-        $eventdata->userfrom          = $user;
-        $eventdata->userto            = $teacher;
-        $eventdata->subject           = get_string("enrolmentnew", 'enrol', $shortname);
-        $eventdata->fullmessage       = get_string('enrolmentnewuser', 'enrol', $a);
-        $eventdata->fullmessageformat = FORMAT_PLAIN;
-        $eventdata->fullmessagehtml   = '';
-        $eventdata->smallmessage      = '';
-        message_send($eventdata);
+        foreach ($teacher as $teachers){
+            $eventdata = new \core\message\message();
+            $eventdata->component         = 'enrol_pagseguro';
+            $eventdata->name              = 'pagseguro_enrolment';
+            $eventdata->userfrom          = $user;
+            $eventdata->userto            = $teacher;
+            $eventdata->subject           = get_string("enrolmentnew", 'enrol', $shortname);
+            $eventdata->fullmessage       = get_string('enrolmentnewuser', 'enrol', $a);
+            $eventdata->fullmessageformat = FORMAT_PLAIN;
+            $eventdata->fullmessagehtml   = '';
+            $eventdata->smallmessage      = '';
+            message_send($eventdata);
+        }
     }
 
     if (!empty($mailadmins)) {
