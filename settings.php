@@ -41,6 +41,8 @@ if ($ADMIN->fulltree) {
 
     $settings->add(new admin_setting_configcheckbox('enrol_pagseguro/mailadmins', get_string('mailadmins', 'enrol_pagseguro'), '', 0));
 
+    $settings->add(new admin_setting_configcheckbox('enrol_pagseguro/mailfromsupport', get_string('mailfromsupport', 'enrol_pagseguro'), '', 0));
+
     $settings->add(new admin_setting_configcheckbox('enrol_pagseguro/automaticenrolboleto',
         get_string('automaticenrolboleto', 'enrol_pagseguro'),
         get_string('automaticenrolboleto_desc', 'enrol_pagseguro'),
