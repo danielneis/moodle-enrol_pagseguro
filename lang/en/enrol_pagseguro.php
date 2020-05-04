@@ -47,6 +47,7 @@ $string['enrolstartdate'] = 'Start date';
 $string['enrolstartdate_help'] = 'If enabled, users can be enrolled from this date onward only.';
 $string['error:unauthorized'] = 'This host is not authorized to use PagSeguro API.';
 $string['mailadmins'] = 'Notify admin';
+$string['mailfromsupport'] = 'The sender of the email will be the support email, oterwise will be the teachers email';
 $string['mailstudents'] = 'Notify students';
 $string['mailteachers'] = 'Notify teachers';
 $string['messageprovider:pagseguro_enrolment'] = 'PagSeguro enrolment messages';
