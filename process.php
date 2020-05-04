@@ -239,7 +239,7 @@ function pagseguro_handle_transaction($transaction_xml, $redirect = true) {
     if($teachers) {
        $teachers= sort_by_roleassignment_authority($teachers, $context);
     }
-    
+
     $mailstudents = $plugin->get_config('mailstudents');
     $mailteachers = $plugin->get_config('mailteachers');
     $mailadmins   = $plugin->get_config('mailadmins');
@@ -255,7 +255,7 @@ function pagseguro_handle_transaction($transaction_xml, $redirect = true) {
         }else {
            $userfrom = array_shift($teachers);
         }
-        
+
         $eventdata = new \core\message\message();
         $eventdata->component         = 'enrol_pagseguro';
         $eventdata->name              = 'pagseguro_enrolment';
