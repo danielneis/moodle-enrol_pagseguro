@@ -35,6 +35,8 @@
 require('../../config.php');
 require_once("lib.php");
 require_once($CFG->libdir.'/enrollib.php');
+require_once('../../lib/classes/user.php');
+
 
 define('COMMERCE_PAGSEGURO_STATUS_AWAITING', 1);
 define('COMMERCE_PAGSEGURO_STATUS_IN_ANALYSIS', 2);
