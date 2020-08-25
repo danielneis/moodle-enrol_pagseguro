@@ -28,11 +28,12 @@
  */
 
 // Block requestes outside pagseguro: header("access-control-allow-origin: https://ws.pagseguro.uol.com.br");.
+// @codingStandardsIgnoreLine
 require('../../config.php');
+
 require_once("lib.php");
 require_once($CFG->libdir.'/enrollib.php');
 require_once('../../lib/classes/user.php');
-
 
 define('COMMERCE_PAGSEGURO_STATUS_AWAITING', 1);
 define('COMMERCE_PAGSEGURO_STATUS_IN_ANALYSIS', 2);
@@ -49,18 +50,18 @@ define('COMMERCE_PAYMENT_STATUS_PENDING', 'pending');
 
 $submited = optional_param('submitbutton', '', PARAM_RAW);
 
-$notificationCode = optional_param('notificationCode', '', PARAM_RAW);
+$notificationcode = optional_param('notificationCode', '', PARAM_RAW);
 
 $transactionid = optional_param('transaction_id', '', PARAM_RAW);
 $instanceid = optional_param('instanceid', 0, PARAM_INT);
 $userid = optional_param('userid', 0, PARAM_INT);
 
 if (isset($CFG->pagsegurousesandbox)) {
-    $pagseguroBaseURL = 'https://sandbox.pagseguro.uol.com.br';
-    $pagseguroWSBaseURL = 'https://ws.sandbox.pagseguro.uol.com.br';
+    $pagesegurobaseurl = 'https://sandbox.pagseguro.uol.com.br';
+    $pagesegurowsbaseurl = 'https://ws.sandbox.pagseguro.uol.com.br';
 } else {
-    $pagseguroBaseURL = 'https://pagseguro.uol.com.br';
-    $pagseguroWSBaseURL = 'https://ws.pagseguro.uol.com.br';
+    $pagesegurobaseurl = 'https://pagseguro.uol.com.br';
+    $pagesegurowsbaseurl = 'https://ws.pagseguro.uol.com.br';
 }
 
 $plugin = enrol_get_plugin('pagseguro');
@@ -69,48 +70,48 @@ $token = $plugin->get_config('pagsegurotoken');
 
 if ($submited) {
 
-    $plugin_instance = $DB->get_record("enrol", array("id" => $instanceid, "status" => 0));
-    $courseid = $plugin_instance->courseid;
+    $plugininstance = $DB->get_record("enrol", array("id" => $instanceid, "status" => 0));
+    $courseid = $plugininstance->courseid;
     $course = $DB->get_record('course', array('id' => $courseid));
 
-    pagseguro_handle_checkout($pagseguroWSBaseURL, $pagseguroBaseURL, $email, $token,
-        $courseid, $plugin, $plugin_instance, $course);
+    pagseguro_handle_checkout($pagesegurowsbaseurl, $pagesegurobaseurl, $email, $token,
+        $courseid, $plugin, $plugininstance, $course);
 
 } else if ($transactionid) {
 
     $PAGE->set_context(\context_system::instance());
-    pagseguro_handle_redirect_back($pagseguroWSBaseURL, $transactionid, $email, $token);
+    pagseguro_handle_redirect_back($pagesegurowsbaseurl, $transactionid, $email, $token);
 
-} else if (!empty($notificationCode)) {
+} else if (!empty($notificationcode)) {
 
-    pagseguro_handle_old_notification_system($pagseguroWSBaseURL, $notificationCode, $email, $token);
+    pagseguro_handle_old_notification_system($pagesegurowsbaseurl, $notificationcode, $email, $token);
 }
 
-function pagseguro_handle_transaction($transaction_xml, $redirect = true) {
+function pagseguro_handle_transaction($transactionxml, $redirect = true) {
     global $CFG, $USER, $DB;
 
     $data = new stdClass();
 
     $plugin = enrol_get_plugin('pagseguro');
 
-    $transaction = json_decode(json_encode(simplexml_load_string($transaction_xml)));
+    $transaction = json_decode(json_encode(simplexml_load_string($transactionxml)));
 
     if ($transaction) {
-        foreach ($transaction as $trans_key => $trans_value) {
-            $trans_key = strtolower($trans_key);
-            if (!is_object($trans_value)) {
-                $data->$trans_key = $trans_value;
+        foreach ($transaction as $transkey => $transvalue) {
+            $transkey = strtolower($transkey);
+            if (!is_object($transvalue)) {
+                $data->$transkey = $transvalue;
             } else {
-                foreach ($trans_value as $key => $value) {
+                foreach ($transvalue as $key => $value) {
                     $key = strtolower($key);
                     if (is_object($value)) {
                         foreach ($value as $k => $v) {
                             $k = strtolower($k);
-                            $k = $trans_key.'_'.$key.'_'.$k;
+                            $k = $transkey.'_'.$key.'_'.$k;
                             $data->$k = $v;
                         }
                     } else {
-                        $key = $trans_key.'_'.$key;
+                        $key = $transkey.'_'.$key;
                         $data->$key = $value;
                     }
                 }
@@ -122,7 +123,7 @@ function pagseguro_handle_transaction($transaction_xml, $redirect = true) {
 
     list($instanceid, $userid) = explode('-', $transaction->items->item->id);
 
-    $data->xmlstring        = trim(htmlentities($transaction_xml));
+    $data->xmlstring        = trim(htmlentities($transactionxml));
     $data->business         = $plugin->get_config('pagsegurobusiness');
     $data->receiver_email   = $plugin->get_config('pagsegurobusiness');
     $data->userid           = $userid;
@@ -145,7 +146,7 @@ function pagseguro_handle_transaction($transaction_xml, $redirect = true) {
         return false;
     }
 
-    if (!$plugin_instance = $DB->get_record("enrol", array("id" => $data->instanceid, "status" => 0))) {
+    if (!$plugininstance = $DB->get_record("enrol", array("id" => $data->instanceid, "status" => 0))) {
         pagseguro_message_error_to_admin("Not a valid instance id", $data);
         return false;
     }
@@ -173,10 +174,10 @@ function pagseguro_handle_transaction($transaction_xml, $redirect = true) {
     $coursecontext = context_course::instance($course->id);
 
     // Check that amount paid is the correct amount.
-    if ( (float) $plugin_instance->cost <= 0 ) {
+    if ( (float) $plugininstance->cost <= 0 ) {
         $cost = (float) $plugin->get_config('cost');
     } else {
-        $cost = (float) $plugin_instance->cost;
+        $cost = (float) $plugininstance->cost;
     }
 
     if ($data->grossamount < $cost) {
@@ -192,9 +193,9 @@ function pagseguro_handle_transaction($transaction_xml, $redirect = true) {
         $DB->insert_record("enrol_pagseguro", $data);
     }
 
-    if ($plugin_instance->enrolperiod) {
+    if ($plugininstance->enrolperiod) {
         $timestart = time();
-        $timeend   = $timestart + $plugin_instance->enrolperiod;
+        $timeend   = $timestart + $plugininstance->enrolperiod;
     } else {
         $timestart = 0;
         $timeend   = 0;
@@ -217,11 +218,11 @@ function pagseguro_handle_transaction($transaction_xml, $redirect = true) {
 
     if (in_array($data->status, $enrolstatuses)) {
 
-        $plugin->enrol_user($plugin_instance, $userid, $plugin_instance->roleid, $timestart, $timeend);
+        $plugin->enrol_user($plugininstance, $userid, $plugininstance->roleid, $timestart, $timeend);
 
     } else if (in_array($data->status, $unenrolstatuses)) {
 
-        $plugin->unenrol_user($plugin_instance, $userid);
+        $plugin->unenrol_user($plugininstance, $userid);
         return;
 
     } else {
@@ -337,39 +338,39 @@ function pagseguro_message_error_to_admin($subject, $data) {
     message_send($eventdata);
 }
 
-function pagseguro_handle_checkout($pagseguroWSBaseURL, $pagseguroBaseURL, $email, $token,
-    $courseid, $plugin, $plugin_instance, $course) {
+function pagseguro_handle_checkout($pagesegurowsbaseurl, $pagesegurobaseurl, $email, $token,
+    $courseid, $plugin, $plugininstance, $course) {
 
     global $CFG, $USER;
 
-    $checkoutURL = $pagseguroWSBaseURL . '/v2/checkout/';
+    $checkouturl = $pagesegurowsbaseurl . '/v2/checkout/';
 
-    $reference    = json_encode(['instanceid' => $plugin_instance->id, 'userid' => $USER->id]);
+    $reference    = json_encode(['instanceid' => $plugininstance->id, 'userid' => $USER->id]);
 
-    $item_id      = "{$plugin_instance->id}-{$USER->id}";
-    $item_desc    = empty($course->fullname) ? 'Curso moodle' : mb_substr($course->fullname, 0, 100);
-    $item_qty     = (int)1;
-    $item_cost    = empty($plugin_instance->cost) ? 0.00 : number_format($plugin_instance->cost, 2);
-    $item_cost    = str_replace(',', '', $item_cost);
-    $item_amount  = $item_cost;
+    $itemid      = "{$plugininstance->id}-{$USER->id}";
+    $itemdesc    = empty($course->fullname) ? 'Curso moodle' : mb_substr($course->fullname, 0, 100);
+    $itemqty     = (int)1;
+    $itemcost    = empty($plugininstance->cost) ? 0.00 : number_format($plugininstance->cost, 2);
+    $itemcost    = str_replace(',', '', $itemcost);
+    $itemamount  = $itemcost;
 
     $encoding     = 'UTF-8';
     $currency     = $plugin->get_config('currency');
 
-    $redirect_url = new moodle_url('/enrol/pagseguro/process.php', ['instanceid' => $plugin_instance->id, 'userid' => $USER->id]);
+    $redirecturl = new moodle_url('/enrol/pagseguro/process.php', ['instanceid' => $plugininstance->id, 'userid' => $USER->id]);
 
-    $url = $checkoutURL .'?email=' . urlencode($email) . "&token=" . $token;
+    $url = $checkouturl .'?email=' . urlencode($email) . "&token=" . $token;
 
     $xml = "<?xml version=\"1.0\" encoding=\"{$encoding}\" standalone=\"yes\"?>
         <checkout>
             <currency>$currency</currency>
-            <redirectURL>$redirect_url</redirectURL>
+            <redirectURL>$redirecturl</redirectURL>
             <items>
                 <item>
-                    <id>$item_id</id>
-                    <description>$item_desc</description>
-                    <amount>$item_amount</amount>
-                    <quantity>$item_qty</quantity>
+                    <id>$itemid</id>
+                    <description>$itemdesc</description>
+                    <amount>$itemamount</amount>
+                    <quantity>$itemqty</quantity>
                 </item>
                 <reference>$reference</reference>
             </items>
@@ -394,12 +395,12 @@ function pagseguro_handle_checkout($pagseguroWSBaseURL, $pagseguroBaseURL, $emai
         redirect(new moodle_url('/enrol/pagseguro/return.php', array('id' => $courseid, 'error' => 'generic')));
     }
 
-    header('Location: '. $pagseguroBaseURL . '/v2/checkout/payment.html?code='.$xml->code);
+    header('Location: '. $pagesegurobaseurl . '/v2/checkout/payment.html?code='.$xml->code);
 }
 
-function pagseguro_handle_redirect_back($pagseguroBaseURL, $transactionid, $email, $token) {
+function pagseguro_handle_redirect_back($pagesegurobaseurl, $transactionid, $email, $token) {
 
-    $url = "{$pagseguroBaseURL}/v2/transactions/{$transactionid}?email={$email}&token={$token}";
+    $url = "{$pagesegurobaseurl}/v2/transactions/{$transactionid}?email={$email}&token={$token}";
 
     $curl = curl_init($url);
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
@@ -414,13 +415,13 @@ function pagseguro_handle_redirect_back($pagseguroBaseURL, $transactionid, $emai
     }
 }
 
-function pagseguro_handle_old_notification_system($pagseguroBaseURL, $notificationCode, $email, $token) {
+function pagseguro_handle_old_notification_system($pagesegurobaseurl, $notificationcode, $email, $token) {
 
-    $transactionsv2URL = $pagseguroBaseURL .'/v2/transactions/notifications/';
+    $transactionsv2url = $pagesegurobaseurl .'/v2/transactions/notifications/';
 
     $transaction = null;
 
-    $url = $transactionsv2URL . $notificationCode . "?email=".$email."&token=".$token;
+    $url = $transactionsv2url . $notificationcode . "?email=".$email."&token=".$token;
 
     $curl = curl_init($url);
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
@@ -434,7 +435,7 @@ function pagseguro_handle_old_notification_system($pagseguroBaseURL, $notificati
 
     $transaction = json_decode(json_encode(simplexml_load_string($transaction)));
 
-    $url = "{$pagseguroBaseURL}/v2/transactions/{$transaction->code}?email={$email}&token={$token}";
+    $url = "{$pagesegurobaseurl}/v2/transactions/{$transaction->code}?email={$email}&token={$token}";
 
     $curl = curl_init($url);
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
