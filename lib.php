@@ -15,13 +15,12 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * pagseguro enrolment plugin.
+ * PagSeguro enrolment plugin.
  *
  * This plugin allows you to set up paid courses.
  *
- * @package    enrol
- * @subpackage pagseguro
- * @copyright  2010 Eugene Venter
+ * @package    enrol_pagseguro
+ * @copyright  2020 Daniel Neis Araujo <danielneis@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -79,7 +78,8 @@ class enrol_pagseguro_plugin extends enrol_plugin {
 
         $context = context_course::instance($instance->courseid);
         if (has_capability('enrol/pagseguro:config', $context)) {
-            $managelink = new moodle_url('/enrol/pagseguro/edit.php', array('courseid' => $instance->courseid, 'id' => $instance->id));
+            $urlparams = ['courseid' => $instance->courseid, 'id' => $instance->id];
+            $managelink = new moodle_url('/enrol/pagseguro/edit.php', $urlparams);
             $instancesnode->add($this->get_instance_name($instance), $managelink, navigation_node::TYPE_SETTING);
         }
     }
@@ -100,8 +100,9 @@ class enrol_pagseguro_plugin extends enrol_plugin {
         $icons = array();
 
         if (has_capability('enrol/pagseguro:config', $context)) {
-            $editlink = new moodle_url("/enrol/pagseguro/edit.php", array('courseid' => $instance->courseid, 'id' => $instance->id));
-            $icons[] = $OUTPUT->action_icon($editlink, new pix_icon('t/edit', get_string('edit'), 'core', array('class' => 'icon')));
+            $editlinkparams = ['courseid' => $instance->courseid, 'id' => $instance->id];
+            $editlink = new moodle_url("/enrol/pagseguro/edit.php", $editlinkparams);
+            $icons[] = $OUTPUT->action_icon($editlink, new pix_icon('t/edit', get_string('edit'), 'core', ['class' => 'icon']));
         }
 
         return $icons;
@@ -169,15 +170,15 @@ class enrol_pagseguro_plugin extends enrol_plugin {
         }
 
         if (abs($cost) < 0.01) { // No cost, other enrolment methods (instances) should be used.
-            echo '<p>'.get_string('nocost', 'enrol_pagseguro').'</p>';
+            echo '<p>' . get_string('nocost', 'enrol_pagseguro') . '</p>';
         } else {
 
             if (isguestuser()) { // Force login only for guest user, not real users with guest role.
                 echo '<div class="mdl-align">',
-                     '<p>',get_string('paymentrequired'),'</p>',
-                     '<p><b>',get_string('cost'),': ', $instance->currency, ' ', $cost,'</b></p>',
-                     '<p>',get_string('needsignuporlogin', 'enrol_pagseguro'),'</p>',
-                     '<p><a href="',new moodle_url('/login'),'">',get_string('loginsite'),'</a></p>',
+                     '<p>', get_string('paymentrequired'), '</p>',
+                     '<p><b>', get_string('cost'), ': ', $instance->currency, ' ', $cost, '</b></p>',
+                     '<p>', get_string('needsignuporlogin', 'enrol_pagseguro'), '</p>',
+                     '<p><a href="', new moodle_url('/login'), '">', get_string('loginsite'), '</a></p>',
                      '</div>';
             } else {
                 require_once("$CFG->dirroot/enrol/pagseguro/locallib.php");

@@ -22,16 +22,12 @@
  * If pagseguro verifies this then it sets up the enrolment for that
  * user.
  *
- * @package    enrol
- * @subpackage pagseguro
- * @copyright 2010 Eugene Venter
- * @copyright  2015 Daniel Neis Araujo <danielneis@gmail.com>
- * @author     Eugene Venter - based on code by others
- * @author     Daniel Neis Araujo based on code by Eugene Venter and others
+ * @package    enrol_pagseguro
+ * @copyright  2020 Daniel Neis Araujo <danielneis@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-//header("access-control-allow-origin: https://ws.pagseguro.uol.com.br");
+// Block requestes outside pagseguro: header("access-control-allow-origin: https://ws.pagseguro.uol.com.br");.
 require('../../config.php');
 require_once("lib.php");
 require_once($CFG->libdir.'/enrollib.php');
@@ -48,7 +44,7 @@ define('COMMERCE_PAGSEGURO_STATUS_CANCELED', 7);
 define('COMMERCE_PAGSEGURO_STATUS_DEBITED', 8); // Valor devolvido para o comprador.
 define('COMMERCE_PAGSEGURO_STATUS_WITHHELD', 9); // Retenção temporária.
 define('COMMERCE_PAYMENT_STATUS_SUCCESS', 'success');
-define('COMMERCE_PAYMENT_STATUS_FAILURE', 'failure') ;
+define('COMMERCE_PAYMENT_STATUS_FAILURE', 'failure');
 define('COMMERCE_PAYMENT_STATUS_PENDING', 'pending');
 
 $submited = optional_param('submitbutton', '', PARAM_RAW);
@@ -77,7 +73,8 @@ if ($submited) {
     $courseid = $plugin_instance->courseid;
     $course = $DB->get_record('course', array('id' => $courseid));
 
-    pagseguro_handle_checkout($pagseguroWSBaseURL, $pagseguroBaseURL, $email, $token, $courseid, $plugin, $plugin_instance, $course);
+    pagseguro_handle_checkout($pagseguroWSBaseURL, $pagseguroBaseURL, $email, $token,
+        $courseid, $plugin, $plugin_instance, $course);
 
 } else if ($transactionid) {
 
@@ -101,13 +98,13 @@ function pagseguro_handle_transaction($transaction_xml, $redirect = true) {
     if ($transaction) {
         foreach ($transaction as $trans_key => $trans_value) {
             $trans_key = strtolower($trans_key);
-            if(!is_object($trans_value)) {
+            if (!is_object($trans_value)) {
                 $data->$trans_key = $trans_value;
             } else {
-                foreach($trans_value as $key => $value) {
+                foreach ($trans_value as $key => $value) {
                     $key = strtolower($key);
-                    if(is_object($value)) {
-                        foreach($value as $k => $v) {
+                    if (is_object($value)) {
+                        foreach ($value as $k => $v) {
                             $k = strtolower($k);
                             $k = $trans_key.'_'.$key.'_'.$k;
                             $data->$k = $v;
@@ -175,7 +172,7 @@ function pagseguro_handle_transaction($transaction_xml, $redirect = true) {
 
     $coursecontext = context_course::instance($course->id);
 
-    // Check that amount paid is the correct amount
+    // Check that amount paid is the correct amount.
     if ( (float) $plugin_instance->cost <= 0 ) {
         $cost = (float) $plugin->get_config('cost');
     } else {
@@ -218,7 +215,7 @@ function pagseguro_handle_transaction($transaction_xml, $redirect = true) {
         COMMERCE_PAGSEGURO_STATUS_CANCELED
     ];
 
-    if (in_array($data->status,$enrolstatuses)) {
+    if (in_array($data->status, $enrolstatuses)) {
 
         $plugin->enrol_user($plugin_instance, $userid, $plugin_instance->roleid, $timestart, $timeend);
 
@@ -235,11 +232,11 @@ function pagseguro_handle_transaction($transaction_xml, $redirect = true) {
         }
     }
 
-    // Pass $view=true to filter hidden caps if the user cannot see them
+    // Pass $view=true to filter hidden caps if the user cannot see them.
     $teachers = get_users_by_capability($context, 'moodle/course:update',
         'u.id,u.email,u.username,'. get_all_user_name_fields(true, 'u'), 'u.id ASC', '', '', '', '', false, true);
-    if($teachers) {
-       $teachers= sort_by_roleassignment_authority($teachers, $context);
+    if ($teachers) {
+        $teachers = sort_by_roleassignment_authority($teachers, $context);
     }
 
     $mailstudents = $plugin->get_config('mailstudents');
@@ -254,8 +251,8 @@ function pagseguro_handle_transaction($transaction_xml, $redirect = true) {
 
         if ($plugin->get_config('mailfromsupport') == 1) {
             $userfrom = get_support_user();
-        }else {
-           $userfrom = array_shift($teachers);
+        } else {
+            $userfrom = array_shift($teachers);
         }
 
         $eventdata = new \core\message\message();
@@ -276,7 +273,7 @@ function pagseguro_handle_transaction($transaction_xml, $redirect = true) {
         $a->course = format_string($course->fullname, true, array('context' => $coursecontext));
         $a->user = fullname($user);
 
-        foreach ($teacher as $teachers){
+        foreach ($teacher as $teachers) {
             $eventdata = new \core\message\message();
             $eventdata->component         = 'enrol_pagseguro';
             $eventdata->name              = 'pagseguro_enrolment';
@@ -340,7 +337,9 @@ function pagseguro_message_error_to_admin($subject, $data) {
     message_send($eventdata);
 }
 
-function pagseguro_handle_checkout($pagseguroWSBaseURL, $pagseguroBaseURL, $email, $token, $courseid, $plugin, $plugin_instance, $course) {
+function pagseguro_handle_checkout($pagseguroWSBaseURL, $pagseguroBaseURL, $email, $token,
+    $courseid, $plugin, $plugin_instance, $course) {
+
     global $CFG, $USER;
 
     $checkoutURL = $pagseguroWSBaseURL . '/v2/checkout/';
@@ -392,7 +391,6 @@ function pagseguro_handle_checkout($pagseguroWSBaseURL, $pagseguroBaseURL, $emai
     $xml = simplexml_load_string($xml);
 
     if (count($xml->error) > 0) {
-        #print_error(var_export($xml->error, true));
         redirect(new moodle_url('/enrol/pagseguro/return.php', array('id' => $courseid, 'error' => 'generic')));
     }
 
@@ -409,7 +407,7 @@ function pagseguro_handle_redirect_back($pagseguroBaseURL, $transactionid, $emai
     $transaction = curl_exec($curl);
     curl_close($curl);
 
-    if ($transaction == 'Unauthorized'){
+    if ($transaction == 'Unauthorized') {
         redirect(new moodle_url('/enrol/pagseguro/return.php', array('error' => 'unauthorized')));
     } else {
         pagseguro_handle_transaction($transaction);
@@ -430,7 +428,7 @@ function pagseguro_handle_old_notification_system($pagseguroBaseURL, $notificati
     $transaction = curl_exec($curl);
     curl_close($curl);
 
-    if ($transaction == 'Unauthorized'){
+    if ($transaction == 'Unauthorized') {
         redirect(new moodle_url('/enrol/pagseguro/return.php', array('id' => $courseid, 'error' => 'unauthorized')));
     }
 
@@ -444,7 +442,7 @@ function pagseguro_handle_old_notification_system($pagseguroBaseURL, $notificati
     $transaction = curl_exec($curl);
     curl_close($curl);
 
-    if ($transaction == 'Unauthorized'){
+    if ($transaction == 'Unauthorized') {
         redirect(new moodle_url('/enrol/pagseguro/return.php', array('id' => $courseid, 'error' => 'unauthorized')));
     } else {
         pagseguro_handle_transaction($transaction, false);

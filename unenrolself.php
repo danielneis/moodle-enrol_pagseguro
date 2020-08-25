@@ -17,9 +17,8 @@
 /**
  * pagseguro enrolment plugin - support for user self unenrolment.
  *
- * @package    enrol
- * @subpackage pagseguro
- * @copyright  2010 Petr Skoda  {@link http://skodak.org}
+ * @package    enrol_pagseguro
+ * @copyright  2020 Daniel Neis Araujo <danielneis@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -40,7 +39,6 @@ require_login($course);
 
 $plugin = enrol_get_plugin('pagseguro');
 
-// security defined inside following function
 if (!$plugin->get_unenrolself_link($instance)) {
     redirect(new moodle_url('/course/view.php', array('id' => $course->id)));
 }

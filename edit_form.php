@@ -18,9 +18,8 @@
  * Adds new instance of enrol_pagseguro to specified course
  * or edits current instance.
  *
- * @package    enrol
- * @subpackage pagseguro
- * @copyright  2010 Petr Skoda  {@link http://skodak.org}
+ * @package    enrol_pagseguro
+ * @copyright  2020 Daniel Neis Araujo <danielneis@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -61,15 +60,17 @@ class enrol_pagseguro_edit_form extends moodleform {
         $mform->addElement('select', 'roleid', get_string('assignrole', 'enrol_pagseguro'), $roles);
         $mform->setDefault('roleid', $plugin->get_config('roleid'));
 
-        $mform->addElement('duration', 'enrolperiod', get_string('enrolperiod', 'enrol_pagseguro'), array('optional' => true, 'defaultunit' => 86400));
+        $options = ['optional' => true, 'defaultunit' => 86400];
+        $mform->addElement('duration', 'enrolperiod', get_string('enrolperiod', 'enrol_pagseguro'), $options);
         $mform->setDefault('enrolperiod', $plugin->get_config('enrolperiod'));
         $mform->addHelpButton('enrolperiod', 'enrolperiod', 'enrol_pagseguro');
 
-        $mform->addElement('date_selector', 'enrolstartdate', get_string('enrolstartdate', 'enrol_pagseguro'), array('optional' => true));
+        $options = ['optional' => true];
+        $mform->addElement('date_selector', 'enrolstartdate', get_string('enrolstartdate', 'enrol_pagseguro'), $options);
         $mform->setDefault('enrolstartdate', 0);
         $mform->addHelpButton('enrolstartdate', 'enrolstartdate', 'enrol_pagseguro');
 
-        $mform->addElement('date_selector', 'enrolenddate', get_string('enrolenddate', 'enrol_pagseguro'), array('optional' => true));
+        $mform->addElement('date_selector', 'enrolenddate', get_string('enrolenddate', 'enrol_pagseguro'), $options);
         $mform->setDefault('enrolenddate', 0);
         $mform->addHelpButton('enrolenddate', 'enrolenddate', 'enrol_pagseguro');
 

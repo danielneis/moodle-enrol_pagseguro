@@ -15,12 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * pagseguro utility script
+ * PagSeguro return script.
  *
- * @package    enrol
- * @subpackage pagseguro
- * @subpackage file
- * @copyright  2004 onwards Martin Dougiamas (http://dougiamas.com)
+ * @package    enrol_pagseguro
+ * @copyright  2020 Daniel Neis Araujo <danielneis@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
