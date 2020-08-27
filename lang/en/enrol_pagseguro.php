@@ -65,3 +65,5 @@ $string['sendpaymentbutton'] = 'Send payment via PagSeguro';
 $string['status'] = 'Allow PagSeguro enrolments';
 $string['status_desc'] = 'Allow users to use PagSeguro to enrol into a course by default.';
 $string['unenrolselfconfirm'] = 'Do you really want to unenrol yourself from course "{$a}"?';
+$string['usesandbox'] = 'Use sandbox';
+$string['usesandboxdesc'] = 'Check this if you want to use a sandbox account (requests will be sent to sandbox.pagseguro.uol.com.br test site instead of the production site)';

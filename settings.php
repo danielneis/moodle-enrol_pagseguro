@@ -29,6 +29,9 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_heading('enrol_pagseguro_settings',
         '', get_string('pluginname_desc', 'enrol_pagseguro')));
 
+    $settings->add(new admin_setting_configcheckbox('enrol_pagseguro/usesandbox',
+        get_string('usesandbox', 'enrol_pagseguro'), get_string('usesandboxdesc', 'enrol_pagseguro'), 0));
+
     $settings->add(new admin_setting_configtext('enrol_pagseguro/pagsegurobusiness',
         get_string('businessemail', 'enrol_pagseguro'), get_string('businessemail_desc', 'enrol_pagseguro'), '', PARAM_TEXT));
 

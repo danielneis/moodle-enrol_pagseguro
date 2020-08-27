@@ -34,9 +34,7 @@ Funcionalidades
 Sandbox
 -------
 
-Para utilizar ambiente de testes do PagSeguro (http://sandbox.pagseguro.uol.com.br/), inclua a seguinte linha no arquivo config.php do Moodle, antes da linha de include do setup.php:
-
-    $CFG->pagsegurousesandbox = true;
+Para utilizar ambiente de testes do PagSeguro (http://sandbox.pagseguro.uol.com.br/), marque a opção "Usar sandbox".
     
 Perguntas Frequentes
 --------------------

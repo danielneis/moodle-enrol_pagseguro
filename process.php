@@ -56,7 +56,7 @@ $transactionid = optional_param('transaction_id', '', PARAM_RAW);
 $instanceid = optional_param('instanceid', 0, PARAM_INT);
 $userid = optional_param('userid', 0, PARAM_INT);
 
-if (isset($CFG->pagsegurousesandbox)) {
+if (get_config('enrol_pageseguro', 'usesandbox') == 1) {
     $pagesegurobaseurl = 'https://sandbox.pagseguro.uol.com.br';
     $pagesegurowsbaseurl = 'https://ws.sandbox.pagseguro.uol.com.br';
 } else {
