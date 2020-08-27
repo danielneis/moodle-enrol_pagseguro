@@ -251,7 +251,7 @@ function pagseguro_handle_transaction($transactionxml, $redirect = true) {
         $a->profileurl = new moodle_url('/user/view.php', array('id' => $user->id));
 
         if ($plugin->get_config('mailfromsupport') == 1) {
-            $userfrom = get_support_user();
+            $userfrom = core_user::get_support_user();
         } else {
             $userfrom = array_shift($teachers);
         }
