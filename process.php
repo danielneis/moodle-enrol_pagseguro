@@ -56,12 +56,12 @@ $transactionid = optional_param('transaction_id', '', PARAM_RAW);
 $instanceid = optional_param('instanceid', 0, PARAM_INT);
 $userid = optional_param('userid', 0, PARAM_INT);
 
-if (get_config('enrol_pageseguro', 'usesandbox') == 1) {
-    $pagesegurobaseurl = 'https://sandbox.pagseguro.uol.com.br';
-    $pagesegurowsbaseurl = 'https://ws.sandbox.pagseguro.uol.com.br';
+if (get_config('enrol_pagseguro', 'usesandbox') == 1) {
+    $pagsegurobaseurl = 'https://sandbox.pagseguro.uol.com.br';
+    $pagsegurowsbaseurl = 'https://ws.sandbox.pagseguro.uol.com.br';
 } else {
-    $pagesegurobaseurl = 'https://pagseguro.uol.com.br';
-    $pagesegurowsbaseurl = 'https://ws.pagseguro.uol.com.br';
+    $pagsegurobaseurl = 'https://pagseguro.uol.com.br';
+    $pagsegurowsbaseurl = 'https://ws.pagseguro.uol.com.br';
 }
 
 $plugin = enrol_get_plugin('pagseguro');
@@ -74,17 +74,17 @@ if ($submited) {
     $courseid = $plugininstance->courseid;
     $course = $DB->get_record('course', array('id' => $courseid));
 
-    pagseguro_handle_checkout($pagesegurowsbaseurl, $pagesegurobaseurl, $email, $token,
+    pagseguro_handle_checkout($pagsegurowsbaseurl, $pagsegurobaseurl, $email, $token,
         $courseid, $plugin, $plugininstance, $course);
 
 } else if ($transactionid) {
 
     $PAGE->set_context(\context_system::instance());
-    pagseguro_handle_redirect_back($pagesegurowsbaseurl, $transactionid, $email, $token);
+    pagseguro_handle_redirect_back($pagsegurowsbaseurl, $transactionid, $email, $token);
 
 } else if (!empty($notificationcode)) {
 
-    pagseguro_handle_old_notification_system($pagesegurowsbaseurl, $notificationcode, $email, $token);
+    pagseguro_handle_old_notification_system($pagsegurowsbaseurl, $notificationcode, $email, $token);
 }
 
 function pagseguro_handle_transaction($transactionxml, $redirect = true) {
@@ -338,12 +338,12 @@ function pagseguro_message_error_to_admin($subject, $data) {
     message_send($eventdata);
 }
 
-function pagseguro_handle_checkout($pagesegurowsbaseurl, $pagesegurobaseurl, $email, $token,
+function pagseguro_handle_checkout($pagsegurowsbaseurl, $pagsegurobaseurl, $email, $token,
     $courseid, $plugin, $plugininstance, $course) {
 
     global $CFG, $USER;
 
-    $checkouturl = $pagesegurowsbaseurl . '/v2/checkout/';
+    $checkouturl = $pagsegurowsbaseurl . '/v2/checkout/';
 
     $reference    = json_encode(['instanceid' => $plugininstance->id, 'userid' => $USER->id]);
 
@@ -395,12 +395,12 @@ function pagseguro_handle_checkout($pagesegurowsbaseurl, $pagesegurobaseurl, $em
         redirect(new moodle_url('/enrol/pagseguro/return.php', array('id' => $courseid, 'error' => 'generic')));
     }
 
-    header('Location: '. $pagesegurobaseurl . '/v2/checkout/payment.html?code='.$xml->code);
+    header('Location: '. $pagsegurobaseurl . '/v2/checkout/payment.html?code='.$xml->code);
 }
 
-function pagseguro_handle_redirect_back($pagesegurobaseurl, $transactionid, $email, $token) {
+function pagseguro_handle_redirect_back($pagsegurobaseurl, $transactionid, $email, $token) {
 
-    $url = "{$pagesegurobaseurl}/v2/transactions/{$transactionid}?email={$email}&token={$token}";
+    $url = "{$pagsegurobaseurl}/v2/transactions/{$transactionid}?email={$email}&token={$token}";
 
     $curl = curl_init($url);
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
@@ -415,9 +415,9 @@ function pagseguro_handle_redirect_back($pagesegurobaseurl, $transactionid, $ema
     }
 }
 
-function pagseguro_handle_old_notification_system($pagesegurobaseurl, $notificationcode, $email, $token) {
+function pagseguro_handle_old_notification_system($pagsegurobaseurl, $notificationcode, $email, $token) {
 
-    $transactionsv2url = $pagesegurobaseurl .'/v2/transactions/notifications/';
+    $transactionsv2url = $pagsegurobaseurl .'/v2/transactions/notifications/';
 
     $transaction = null;
 
@@ -435,7 +435,7 @@ function pagseguro_handle_old_notification_system($pagesegurobaseurl, $notificat
 
     $transaction = json_decode(json_encode(simplexml_load_string($transaction)));
 
-    $url = "{$pagesegurobaseurl}/v2/transactions/{$transaction->code}?email={$email}&token={$token}";
+    $url = "{$pagsegurobaseurl}/v2/transactions/{$transaction->code}?email={$email}&token={$token}";
 
     $curl = curl_init($url);
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
