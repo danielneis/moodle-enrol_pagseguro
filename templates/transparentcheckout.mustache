@@ -1,0 +1,83 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template enrol_pagseguro/transparentcheckout
+
+    The content to display when editing a tool.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * rows An array of objects with label, hidelabel, text and id
+
+    Example context (json):
+    {
+        "rows": [
+            {
+                "label": "Tool URL",
+                "text": "http://example.com/",
+                "id": "toolurl",
+                "hidelabel": false
+            },
+            {
+                "label": "Secret",
+                "text": "ABCDEF1234567890",
+                "id": "secret",
+                "hidelabel": true
+            }
+        ]
+    }
+}}
+
+<div align="center">
+	<p>{{requestPayment}}</p>
+	<img src="https://p.simg.uol.com.br/out/pagseguro/i/botoes/pagamentos/99x61-pagar-assina.gif"><br /><br /><br />
+	<button type="button" class="btn btn-primary" onclick="loadDoc( {{instanceId}}, {{ courseP }} )" data-toggle="modal" data-target="#pagseguroModal"
+	style="border-radius:15px;box-shadow:0 1px 3px #666666;color:#ffffff;font-size:20px;background:#4DB082;padding:10px 20px;text-decoration:none;">
+	  {{buttonString}}
+	</button>
+	<br /><br /><br />
+	<span id="session"></span>
+	<span id="return"></span>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="pagseguroModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+	  <div class="modal-header">
+	    <h5 class="modal-title" id="exampleModalLabel">{{instanceId}} - {{instanceName}}</h5>
+	    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		  <span aria-hidden="true">&times;</span>
+		</button>
+	  </div>
+	  <div id="modal-return" class="modal-body">
+	  	
+	  </div>
+<!--  <div class="modal-footer">
+//		<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+//		<button type="button" class="btn btn-primary">Save changes</button>
+//	  </div> -->
+	</div>
+  </div>
+  <script type="text/javascript" src="https://stc.sandbox.pagseguro.uol.com.br/pagseguro/api/v2/checkout/pagseguro.directpayment.js"></script>
+</div>
