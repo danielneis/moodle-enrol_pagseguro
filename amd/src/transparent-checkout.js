@@ -25,6 +25,7 @@
 
 var brandName = '';
 var ghash = '';
+var inst_val='';
 
 function loadDoc(courseid, p){
   require(['core/ajax'], function(ajax) {
@@ -192,7 +193,7 @@ function installments(brandName,cp){
         if(!response["error"]){
           var sel_installments = '<select id="installments" name="ccinstallments">';
           response["installments"][brandName].forEach(function(inst){
-            sel_installments += '<option value="'+inst["quantity"]+'">';
+            sel_installments += '<option value="'+inst["quantity"]+'" data-installment-value="'+inst["installmentAmount"].toFixed(2)+'" >';
             sel_installments += inst["quantity"]+'x de '+inst["installmentAmount"].toFixed(2);
             sel_installments += '</option>';
           });
@@ -232,6 +233,7 @@ function paycc(){
             $("input[name=cc_token]").val(response.card.token);
             var urlParams = new URLSearchParams(window.location.search);
         	$("input[name=courseid]").val(urlParams.get('id'));
+        	$("input[name=inst_val]").val($("#installments").data('data-installment-value'));
             $("#pagseguro_cc_form").submit();
           }
         },

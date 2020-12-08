@@ -64,9 +64,16 @@ class enrol_pagseguro_external extends external_api {
             throw new moodle_exception('cannotviewprofile');
         }
         
-        $url = 'https://ws.sandbox.pagseguro.uol.com.br/v2/sessions';
+        if (get_config('enrol_pagseguro', 'usesandbox') == 1) {
+        	$url = 'https://ws.sandbox.pagseguro.uol.com.br/v2/sessions';
+        }else{
+        	$url = 'https://ws.pagseguro.uol.com.br/v2/sessions'
+        }
+
+        $ps_email = get_config('enrol_pagseguro', 'pagsegurobusiness');
+        $ps_token = get_config('enrol_pagseguro', 'pagsegurotoken')
         
-		$data = array('email' => 'igor@igoragatti.com', 'token' => '43BB06B5ADC74F8184020F9D6CEE051E');
+		$data = array('email' => $ps_email, 'token' => $ps_token);
 
 		// use key 'http' even if you send the request to https://...
 		$options = array(

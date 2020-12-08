@@ -58,6 +58,12 @@ $plugin = enrol_get_plugin('pagseguro');
 $email = $plugin->get_config('pagsegurobusiness');
 $token = $plugin->get_config('pagsegurotoken');
 
+if (get_config('enrol_pagseguro', 'usesandbox') == 1) {
+	$baseUrl = 'https://ws.sandbox.pagseguro.uol.com.br';
+}else{
+	$baseUrl = 'https://ws.pagseguro.uol.com.br'
+} 
+
 $notificationCode = optional_param('notificationCode', '', PARAM_RAW);
 $notificationType = optional_param('notificationType', '', PARAM_RAW);
 
@@ -71,6 +77,7 @@ if($payment_method == 'cc'){
 	$courseid = optional_param('courseid', '0', PARAM_INT);
 	$plugin_instance = $DB->get_record('enrol', array('courseid' => $courseid, 'enrol' => 'pagseguro'));
 	$whole_phone = optional_param('senderphonenumber', '', PARAM_RAW);
+	$inst_val = optional_param('inst_val', '', PARAM_RAW);
 	
 	$params['courseid'] = $courseid;
 	$params['instanceid'] = $plugin_instance->id;
@@ -90,7 +97,7 @@ if($payment_method == 'cc'){
 	$params['item_qty'] = 1;
 	$params['cc_token'] = optional_param('cc_token', '', PARAM_RAW);
 	$params['cc_installment_quantity'] = optional_param('ccinstallments', '', PARAM_RAW);
-	$params['cc_installment_value'] = str_replace(',','',number_format(100,2)); // TODO: set hidden field and grab value from there
+	$params['cc_installment_value'] = number_format($inst_val,2);
 	$params['address_street'] = optional_param('billingstreet', '', PARAM_RAW);
     $params['address_number'] = optional_param('billingnumber', '', PARAM_RAW);
 	$params['address_complement'] = optional_param('billingcomplement', '', PARAM_RAW);
@@ -103,7 +110,7 @@ if($payment_method == 'cc'){
 	$params['payment_status'] = COMMERCE_PAYMENT_STATUS_PENDING;
 	
 	// Handle Credit Card Checkout
-	pagseguro_transparent_ccCheckout($params, $email, $token);
+	pagseguro_transparent_ccCheckout($params, $email, $token, $baseUrl);
    
 }
 
@@ -133,11 +140,11 @@ if($payment_method == 'boleto'){
   $params['sender_hash'] = optional_param('sender_hash', '', PARAM_RAW);
   $params['plugin_instance'] = $plugin_instance;
 
-  pagseguro_transparent_boletoCheckout($params, $email, $token);
+  pagseguro_transparent_boletoCheckout($params, $email, $token,$baseUrl);
 }
 
 if(!empty($notificationCode) && $notificationType == 'transaction'){	
-	pagseguro_transparent_notificationRequest($notificationCode, $email, $token);
+	pagseguro_transparent_notificationRequest($notificationCode, $email, $token, $baseUrl);
 }
 
 /**
@@ -149,7 +156,7 @@ if(!empty($notificationCode) && $notificationType == 'transaction'){
  * $token: string with Pagseguro seller token
  * 
  */
-function pagseguro_transparent_ccCheckout($params, $email, $token){
+function pagseguro_transparent_ccCheckout($params, $email, $token, $baseUrl){
     
   // Insert into database the order (so there aren't any lost customers)
   $refid = pagseguro_transparent_insertOrder($params, $email, $token);
@@ -157,7 +164,7 @@ function pagseguro_transparent_ccCheckout($params, $email, $token){
   
   $req_xml = pagseguro_transparent_ccXml($params);
   
-  $url = "https://ws.sandbox.pagseguro.uol.com.br/v2/transactions?email=".$email."&token=".$token;
+  $url = $baseUrl."/v2/transactions?email={$email}&token={$token}";
 
   $data = pagseguro_transparent_sendPaymentDetails($req_xml, $url);
   
@@ -198,7 +205,7 @@ function pagseguro_transparent_boletoCheckout($params, $email, $token){
   
   $req_xml = pagseguro_transparent_boletoXml($params);
 
-  $url = "https://ws.sandbox.pagseguro.uol.com.br/v2/transactions?email=".$email."&token=".$token;
+  $url = $baseUrl."/v2/transactions?email={$email}&token={$token}";
 
   $data = pagseguro_transparent_sendPaymentDetails($req_xml, $url);
 
@@ -233,7 +240,7 @@ function pagseguro_transparent_boletoCheckout($params, $email, $token){
  */
 function pagseguro_transparent_notificationRequest($notificationCode, $email, $token){
   
-  $url = "https://ws.sandbox.pagseguro.uol.com.br/v3/transactions/notifications/{$notificationCode}?email={$email}&token={$token}";
+  $url = $baseUrl."/v3/transactions/notifications/{$notificationCode}?email={$email}&token={$token}";
   
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_URL, $url);
