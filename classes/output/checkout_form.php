@@ -23,6 +23,8 @@
  */
 namespace enrol_pagseguro\output;
 
+defined('MOODLE_INTERNAL') || die;
+
 require_once("$CFG->dirroot/webservice/externallib.php");
 
 use renderable;
@@ -39,11 +41,11 @@ use stdClass;
 class checkout_form implements renderable, templatable {
 
 
-	public $form_params = array();
-	
-	public function __construct(array $fparams = array()){
-		$this->form_params = $fparams;
-	}
+    public $formparams = array();
+
+    public function __construct(array $fparams = array()) {
+        $this->formparams = $fparams;
+    }
 
     /**
      * Export this data so it can be used as the context for a mustache template.
@@ -51,25 +53,22 @@ class checkout_form implements renderable, templatable {
      * @return stdClass
      */
     public function export_for_template(renderer_base $output) {
-//        $data = \core_webservice_external::get_site_info();
-		global $USER, $COURSE, $PAGE;
-		
-		
-		$data = array();
-		$data["courseid"] = $PAGE->course->id;
-		$data["email"] = $USER->email;
-		$data["fullname"] = $USER->firstname." ".$USER->lastname;
-		if($USER->cpf){
-			$data["cpf"] = $USER->cpf;
-		}
-		if($USER->phone){
-			$data["phone"] = $USER->phone;
-		}
-        $data["dt"] = userdate(time()) . ' ' . rand();
-        if($this->form_params['courseP']){
-        	$data["price"] = $this->form_params['courseP'];
+        global $USER, $COURSE, $PAGE;
+
+        $data = array();
+        $data["courseid"] = $PAGE->course->id;
+        $data["email"] = $USER->email;
+        $data["fullname"] = $USER->firstname." ".$USER->lastname;
+        if ($USER->cpf) {
+            $data["cpf"] = $USER->cpf;
         }
-        
+        if ($USER->phone) {
+            $data["phone"] = $USER->phone;
+        }
+        $data["dt"] = userdate(time()) . ' ' . rand();
+        if ($this->formparams['courseP']) {
+            $data["price"] = $this->formparams['courseP'];
+        }
 
         return json_encode($data);
     }

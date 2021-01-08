@@ -46,10 +46,12 @@ if (!enrol_is_enabled('pagseguro')) {
 $plugin = enrol_get_plugin('pagseguro');
 
 if ($instanceid) {
-    $instanceparams = ['courseid' => $course->id, 'enrol' => 'pagseguro', 'id' => $instanceid];
-    $instance = $DB->get_record('enrol', $instanceparams, '*', MUST_EXIST);
+    $instance = $DB->get_record('enrol',
+        array('courseid' => $course->id, 'enrol' => 'pagseguro', 'id' => $instanceid),
+        '*', MUST_EXIST);
 } else {
     require_capability('moodle/course:enrolconfig', $context);
+    // No instance yet, we have to add new instance.
     navigation_node::override_active_url(new moodle_url('/enrol/instances.php', array('id' => $course->id)));
     $instance = new stdClass();
     $instance->id       = null;

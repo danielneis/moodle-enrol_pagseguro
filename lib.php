@@ -180,26 +180,25 @@ class enrol_pagseguro_plugin extends enrol_plugin {
                      '<p>', get_string('needsignuporlogin', 'enrol_pagseguro'), '</p>',
                      '<p><a href="', new moodle_url('/login'), '">', get_string('loginsite'), '</a></p>',
                      '</div>';
-            } elseif( $this->get_config('transparentcheckout') == 1 ) {
-            
-            	$tc_data = array();
-            	$tc_data["requestPayment"] = get_string('paymentrequired', 'enrol_pagseguro', $instance);
-            	$tc_data["instanceName"]=$this->get_instance_name($instance);
-            	$tc_data["instanceId"]= $instance->courseid;
-            	$tc_data["buttonString"] = get_string('sendpaymentbutton', 'enrol_pagseguro');
-            	$tc_data["cfgRoot"] = $CFG->wwwroot;
-            	$tc_data["courseP"] = (float) $instance->cost;
-            	$tr_data["getSessionUrl"] = new moodle_url('/enrol/pagseguro/tr_process.php');
-            	
-            	$PAGE->requires->js_call_amd('enrol_pagseguro/transparent-checkout', 'init');
-            	
-            	$output = $OUTPUT->render_from_template("enrol_pagseguro/transparentcheckout", $tc_data);
-            	
-				return $output;
-				
-            } else{
-            	
-            	
+            } else if ( $this->get_config('transparentcheckout') == 1 ) {
+
+                $tcdata = array();
+                $tcdata["requestPayment"] = get_string('paymentrequired', 'enrol_pagseguro', $instance);
+                $tcdata["instanceName"] = $this->get_instance_name($instance);
+                $tcdata["instanceId"] = $instance->courseid;
+                $tcdata["buttonString"] = get_string('sendpaymentbutton', 'enrol_pagseguro');
+                $tcdata["cfgRoot"] = $CFG->wwwroot;
+                $tcdata["courseP"] = (float) $instance->cost;
+                $tcdata["getSessionUrl"] = new moodle_url('/enrol/pagseguro/tr_process.php');
+
+                $PAGE->requires->js_call_amd('enrol_pagseguro/transparent-checkout', 'init');
+
+                $output = $OUTPUT->render_from_template("enrol_pagseguro/transparentcheckout", $tcdata);
+
+                return $output;
+
+            } else {
+
                 require_once("$CFG->dirroot/enrol/pagseguro/locallib.php");
                 // Sanitise some fields before building the pagseguro form.
                 $coursefullname  = format_string($course->fullname, true, array('context' => $context));

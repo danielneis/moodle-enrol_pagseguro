@@ -1,5 +1,6 @@
 <?php
-
+// This file is part of Moodle - http://moodle.org/
+//
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -22,24 +23,27 @@
  */
 
 // We defined the web service functions to install.
+
+defined('MOODLE_INTERNAL') || die;
+
 $functions = array(
 
-	'enrol_pagseguro_get_session' => array(
-		'classname'   => 'enrol_pagseguro_external',
-		'methodname'  => 'get_session',
-		'classpath'   => 'enrol/pagseguro/externallib.php',
-		'description' => 'Gets the session token from PagSeguro.',
-		'ajax'		  => true, 
-		'type'        => 'read',
-	),
-	
-	'enrol_pagseguro_get_forms' => array(
-		'classname'   => 'enrol_pagseguro_external',
-		'methodname'  => 'get_forms',
-		'classpath'   => 'enrol/pagseguro/externallib.php',
-		'description' => 'Renders the form for PagSeguro Transparent Checkout.',
-		'ajax'		  => true, 
-		'type'        => 'read',
-	),
+    'enrol_pagseguro_get_session' => array(
+        'classname'   => 'enrol_pagseguro_external',
+        'methodname'  => 'get_session',
+        'classpath'   => 'enrol/pagseguro/externallib.php',
+        'description' => 'Gets the session token from PagSeguro.',
+        'ajax'        => true,
+        'type'        => 'read',
+    ),
+
+    'enrol_pagseguro_get_forms' => array(
+        'classname'   => 'enrol_pagseguro_external',
+        'methodname'  => 'get_forms',
+        'classpath'   => 'enrol/pagseguro/externallib.php',
+        'description' => 'Renders the form for PagSeguro Transparent Checkout.',
+        'ajax'        => true,
+        'type'        => 'read',
+    ),
 );
 

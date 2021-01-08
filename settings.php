@@ -57,10 +57,18 @@ if ($ADMIN->fulltree) {
         get_string('automaticenrolboleto', 'enrol_pagseguro'),
         get_string('automaticenrolboleto_desc', 'enrol_pagseguro'),
         0));
-        
-    $settings->add(new admin_setting_configcheckbox('enrol_pagseguro/transparentcheckout', get_string('transparentcheckout', 'enrol_pagseguro'), '', 0));
-    
-    $settings->add(new admin_setting_configcheckbox('enrol_pagseguro/usesandbox', get_string('usesandbox', 'enrol_pagseguro'), '', 0));
+
+    $settings->add(new admin_setting_configcheckbox(
+        'enrol_pagseguro/transparentcheckout',
+        get_string('transparentcheckout', 'enrol_pagseguro'),
+        '',
+        0));
+
+    $settings->add(new admin_setting_configcheckbox(
+        'enrol_pagseguro/usesandbox',
+        get_string('usesandbox', 'enrol_pagseguro'),
+        '',
+        0));
 
     $settings->add(new admin_setting_heading('enrol_pagseguro_defaults',
         get_string('enrolinstancedefaults', 'admin'), get_string('enrolinstancedefaults_desc', 'admin')));
