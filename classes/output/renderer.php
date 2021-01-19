@@ -17,8 +17,8 @@
 /**
  * Renderer class for local hackfest.
  *
- * @package    local_hackfest
- * @copyright  2015 Damyon Wiese
+ * @package    enrol_pagseguro
+ * @copyright  2020 Igor Agatti Lima
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace enrol_pagseguro\output;
@@ -28,10 +28,9 @@ defined('MOODLE_INTERNAL') || die;
 use plugin_renderer_base;
 
 /**
- * Renderer class for local hackfest.
+ * Renderer class for the pagseguro form in modal.
  *
- * @package    local_hackfest
- * @copyright  2015 Damyon Wiese
+ * @copyright  2020 Igor Agatti Lima
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class renderer extends plugin_renderer_base {

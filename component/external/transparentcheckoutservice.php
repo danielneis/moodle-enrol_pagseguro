@@ -15,10 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * External Web Service Template
+ * External Web Service that connects with pagseguro checkout service.
  *
- * @package    localwstemplate
- * @copyright  2011 Moodle Pty Ltd (http://moodle.com)
+ * @package    enrol_pagseguro
+ * @copyright  Igor Agatti Lima <igor@igoragatti.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -26,6 +26,12 @@ defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->libdir . "/externallib.php");
 
+/**
+ * External Web Service that connects with pagseguro checkout service.
+ *
+ * @copyright  Igor Agatti Lima <igor@igoragatti.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class enrol_pagseguro_external extends external_api {
 
     /**
@@ -45,8 +51,9 @@ class enrol_pagseguro_external extends external_api {
     }
 
     /**
-     * Returns welcome message
-     * @return string welcome message
+     * Connects to pagseguro webservice and retrieves session token.
+     *
+     * @return string $sessionToken
      */
     public static function get_session() {
         global $USER;
@@ -73,7 +80,7 @@ class enrol_pagseguro_external extends external_api {
         }
 
         $psemail = get_config('enrol_pagseguro', 'pagsegurobusiness');
-        $pstoken = get_config('enrol_pagseguro', 'pagsegurotoken')
+        $pstoken = get_config('enrol_pagseguro', 'pagsegurotoken');
 
         $data = array('email' => $psemail, 'token' => $pstoken);
 
@@ -98,7 +105,7 @@ class enrol_pagseguro_external extends external_api {
     }
 
     /**
-     * Returns description of method result value.
+     * Returns the session token from pagseguro.
      * @return external_description
      */
     public static function get_session_returns() {

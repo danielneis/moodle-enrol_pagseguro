@@ -25,7 +25,6 @@
 
 var brandName = '';
 var ghash = '';
-var inst_val = '';
 
 function loadDoc(courseid, p){
     require(['core/ajax'], function(ajax) {
@@ -35,7 +34,7 @@ function loadDoc(courseid, p){
         }]);
         promises[0].done(function(response) {
             setPagueSeguroWSSessionId(response.stoken,courseid, response.courseP);
-        }).fail(function() {
+        }).fail(function(response) {
             // Do something with the exception.
         });
     });
@@ -89,7 +88,7 @@ function createMasks(){
                 var mask = (ph.length > 14) ? masks[1] : masks [0];
                 $('.input-phone').mask(mask, ph_options);
             }
-        }
+        };
         $('.input-phone').mask("(00) 0000-0000", ph_options);
         var options = {
             onKeyPress: function(doc, e, field, options){
@@ -97,7 +96,7 @@ function createMasks(){
                 var mask = (doc.length > 14) ? masks[1] : masks [0];
                 $('.input-cpfcnpj').mask(mask, options);
             }
-        }
+        };
         $('.input-cpfcnpj').mask("000.000.000-009", options);
         $('.input-ccnumber').mask('0000 0000 0000 0000');
         $('.input-ccvalid').mask('00/0000');
@@ -248,10 +247,12 @@ function paycc(){
 
 function payboleto(){
     if(boletoValidateFields()){
-        $("#pagseguro_boleto_form input[name=sender_hash]").val(ghash);
-        var urlParams = new URLSearchParams(window.location.search);
-        $("#pagseguro_boleto_form input[name=courseid]").val(urlParams.get('id'));
-        $("#pagseguro_boleto_form").submit();
+        require(['jquery'], function($){
+            $("#pagseguro_boleto_form input[name=sender_hash]").val(ghash);
+            var urlParams = new URLSearchParams(window.location.search);
+            $("#pagseguro_boleto_form input[name=courseid]").val(urlParams.get('id'));
+            $("#pagseguro_boleto_form").submit();
+        });
     }
 }
 

@@ -15,8 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Adds new instance of enrol_pagseguro to specified course
- * or edits current instance.
+ * Adds new instance of enrol_pagseguro to specified course or edits current instance.
  *
  * @package    enrol_pagseguro
  * @copyright  2020 Daniel Neis Araujo <danielneis@gmail.com>

@@ -15,10 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * External Web Service Template
+ * External Web Service that connects with pagseguro checkout service.
  *
- * @package    localwstemplate
- * @copyright  2011 Moodle Pty Ltd (http://moodle.com)
+ * @package    enrol_pagseguro
+ * @copyright  Igor Agatti Lima <igor@igoragatti.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -26,6 +26,13 @@ defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->libdir . "/externallib.php");
 
+/**
+ * External Web Service that connects with pagseguro checkout service.
+ *
+ * @package    enrol_pagseguro
+ * @copyright  Igor Agatti Lima <igor@igoragatti.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class enrol_pagseguro_external extends external_api {
 
     /**
@@ -39,11 +46,21 @@ class enrol_pagseguro_external extends external_api {
     }
 
     /**
-     * Returns welcome message
-     * @return string welcome message
+     * Connects to pagseguro webservice and retrieves session token.
+     *
+     * @param string $courseprice
+     * @return string $sessionToken
      */
     public static function get_session($courseprice) {
         global $USER;
+        
+        $psemail = get_config('enrol_pagseguro', 'pagsegurobusiness');
+        $pstoken = get_config('enrol_pagseguro', 'pagsegurotoken');
+        if (get_config('enrol_pagseguro', 'usesandbox') == 1) {
+            $baseurl = 'https://ws.sandbox.pagseguro.uol.com.br/v2/sessions?email=';
+        } else {
+            $baseurl = 'https://ws.pagseguro.uol.com.br/v2/sessions?email=';
+        } 
 
         $params = self::validate_parameters(self::get_session_parameters(),
             array(
@@ -51,8 +68,9 @@ class enrol_pagseguro_external extends external_api {
             )
         );
 
-        $url = 'https://ws.sandbox.pagseguro.uol.com.br/v2/sessions?email='.
-            urlencode('igor@igoragatti.com'). "&token=43BB06B5ADC74F8184020F9D6CEE051E";
+        $url = $baseurl . urlencode($psemail) . '&token=' . $pstoken;
+        
+        //var_dump($url);
 
         $curl = curl_init($url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
@@ -62,6 +80,7 @@ class enrol_pagseguro_external extends external_api {
 
         $resultxml = simplexml_load_string($xml);
         $rtn = array();
+
         $rtn['stoken'] = $resultxml->id->__toString();
         $rtn['courseP'] = $courseprice;
 
@@ -82,6 +101,10 @@ class enrol_pagseguro_external extends external_api {
         );
     }
 
+    /**
+     * Returns description of method parameters
+     * @return external_function_parameters
+     */
     public static function get_forms_parameters() {
         return new external_function_parameters(
             array(
@@ -92,6 +115,15 @@ class enrol_pagseguro_external extends external_api {
         );
     }
 
+
+    /**
+     * Renders the form inside pagseguro modal.
+     *
+     * @param string $sessionid
+     * @param string $courseid
+     * @param string $courseprice
+     * @return string $sessionToken
+     */
     public static function get_forms($sessionid, $courseid, $courseprice) {
         global $PAGE;
 
@@ -110,6 +142,11 @@ class enrol_pagseguro_external extends external_api {
         return $page->export_for_template($renderer);
     }
 
+    /**
+     * Returns description of method result value
+     * @return external_description
+     *
+     */
     public static function get_forms_returns() {
         $result = new external_value(PARAM_RAW, 'the current time');
         return $result;

@@ -22,9 +22,8 @@
  * If pagseguro verifies this then it sets up the enrolment for that
  * user.
  *
- * @package    enrol
- * @subpackage pagseguro
- * @copyright 2010 Eugene Venter
+ * @package    enrol_pagseguro
+ * @copyright  2010 Eugene Venter
  * @copyright  2015 Daniel Neis Araujo <danielneis@gmail.com>
  * @author     Eugene Venter - based on code by others
  * @author     Daniel Neis Araujo based on code by Eugene Venter and others
@@ -61,7 +60,7 @@ $token = $plugin->get_config('pagsegurotoken');
 if (get_config('enrol_pagseguro', 'usesandbox') == 1) {
     $baseurl = 'https://ws.sandbox.pagseguro.uol.com.br';
 } else {
-    $baseurl = 'https://ws.pagseguro.uol.com.br'
+    $baseurl = 'https://ws.pagseguro.uol.com.br';
 }
 
 $notificationcode = optional_param('notificationCode', '', PARAM_RAW);
@@ -149,11 +148,12 @@ if (!empty($notificationcode) && $notificationtype == 'transaction') {
 /**
  * Controller function of the credit card checkout
  *
- * parameters:
- * $params: array of information about the order, gathered from the form
- * $email: string with Pagseguro seller email
- * $token: string with Pagseguro seller token
+ * @param array $params array of information about the order, gathered from the form
+ * @param string $email Pagseguro seller email
+ * @param string $token Pagseguro seller token
+ * @param string $baseurl defines if uses sandbox or production environment
  *
+ * @return void
  */
 function pagseguro_transparent_cc_checkout($params, $email, $token, $baseurl) {
 
@@ -189,13 +189,14 @@ function pagseguro_transparent_cc_checkout($params, $email, $token, $baseurl) {
 /**
  * Controller function of the boleto checkout
  *
- * parameters:
- * $params: array of information about the order, gathered from the form
- * $email: string with Pagseguro seller email
- * $token: string with Pagseguro seller token
+ * @param array $params array of information about the order, gathered from the form
+ * @param string $email Pagseguro seller email
+ * @param string $token Pagseguro seller token
+ * @param string $baseurl defines if uses sandbox or production environment
  *
+ * @return void
  */
-function pagseguro_transparent_boletocheckout($params, $email, $token) {
+function pagseguro_transparent_boletocheckout($params, $email, $token, $baseurl) {
 
     // First we insert the order into the database, so the customer's info isn't lost.
     $refid = pagseguro_transparent_insertorder($params, $email, $token);
@@ -229,14 +230,15 @@ function pagseguro_transparent_boletocheckout($params, $email, $token) {
 
 /**
  * Controller function of the notification receiver
+ * 
+ * @param string $notificationcode the notification code sent by Pagseguro
+ * @param string $email Pagseguro seller email
+ * @param string $token Pagseguro seller token
+ * @param string $baseurl defines if uses sandbox or production environment
  *
- * parameters:
- * $notificationcode: string with the notification code sent by Pagseguro
- * $email: string with Pagseguro seller email
- * $token: string with Pagseguro seller token
- *
+ * @return void
  */
-function pagseguro_transparent_notificationrequest($notificationcode, $email, $token) {
+function pagseguro_transparent_notificationrequest($notificationcode, $email, $token, $baseurl) {
 
     $url = $baseurl."/v3/transactions/notifications/{$notificationcode}?email={$email}&token={$token}";
 
@@ -258,15 +260,12 @@ function pagseguro_transparent_notificationrequest($notificationcode, $email, $t
 }
 
 /**
- * pagseguro_transparent_sendpaymentdetails
  * Sends payment details with an XML string to a URL using the curl request system.
  *
- * parameters:
- * $xml: string with the XML file to be sent to URL
- * $url: string with the URL
+ * @param string $xml the XML file to be sent to URL
+ * @param string $url
  *
- * return:
- * response from the curl request
+ * @return mixed $data the response from the curl request
  */
 function pagseguro_transparent_sendpaymentdetails($xml, $url) {
 
@@ -289,16 +288,13 @@ function pagseguro_transparent_sendpaymentdetails($xml, $url) {
 }
 
 /**
- * pagseguro_transparent_insertorder
  * Inserts preliminary order information into enrol_pagseguro table.
  *
- * parameters:
- * $params: array of information about the order, gathered from the form
- * $email: string with Pagseguro seller email
- * $token: string with Pagseguro seller token
+ * @param array $params information about the order, gathered from the form
+ * @param string $email Pagseguro seller email
+ * @param string $token Pagseguro seller token
  *
- * return:
- * ID of the record inserted
+ * @return string ID of the record inserted
  */
 function pagseguro_transparent_insertorder($params, $email, $token) {
     global $USER, $DB;
@@ -317,16 +313,13 @@ function pagseguro_transparent_insertorder($params, $email, $token) {
 }
 
 /**
- * pagseguro_transparent_updateorder
- * Inserts preliminary order information into enrol_pagseguro table.
+ * Updates the order information in enrol_pagseguro table.
  *
- * parameters:
- * $params: array of information about the order, gathered from the form
- * $email: string with Pagseguro seller email
- * $token: string with Pagseguro seller token
+ * @param array $params information about the order, gathered from the form or pagseguro notification
+ * @param string $email Pagseguro seller email
+ * @param string $token Pagseguro seller token
  *
- * return:
- * response from the curl request
+ * @return void
  */
 function pagseguro_transparent_updateorder($params, $email, $token) {
     global $USER, $DB;
@@ -345,6 +338,13 @@ function pagseguro_transparent_updateorder($params, $email, $token) {
 
 }
 
+/**
+ * Receives transaction data and updates the database.
+ *
+ * @param stdClass $data
+ *
+ * @return string $id the record id of the updated record in the database
+ */
 function pagseguro_transparent_handletransactionresponse($data) {
 
     global $DB;
@@ -367,6 +367,7 @@ function pagseguro_transparent_handletransactionresponse($data) {
         case COMMERCE_PAGSEGURO_STATUS_PAID:
         case COMMERCE_PAGSEGURO_STATUS_AVAILABLE:
             $rec->payment_status = COMMERCE_PAYMENT_STATUS_SUCCESS;
+            // TODO: event of receiving payment.
             break;
         case COMMERCE_PAGSEGURO_STATUS_DISPUTED:
         case COMMERCE_PAGSEGURO_STATUS_REFUNDED:
@@ -384,6 +385,14 @@ function pagseguro_transparent_handletransactionresponse($data) {
 
 }
 
+
+/**
+ * Enrols or unenrols user depending on the database record.
+ *
+ * @param stdClass $rec the record in the database
+ *
+ * @return void
+ */
 function pagseguro_transparent_handleenrolment($rec) {
     global $DB;
 
@@ -409,6 +418,13 @@ function pagseguro_transparent_handleenrolment($rec) {
 
 }
 
+/**
+ * Builds the xml to send bank ticket request to pagseguro
+ *
+ * @param array $params fields from the form and plugin settings.
+ *
+ * @return string of data in xml format
+ */
 function pagseguro_transparent_boletoxml($params) {
     return "<? xml version=\"1.0\" encoding=\"ISO-8859-1\" standalone=\"yes\" ?>
         <payment>
@@ -447,6 +463,13 @@ function pagseguro_transparent_boletoxml($params) {
             </payment>";
 }
 
+/**
+ * Builds the xml to send credit card request to pagseguro
+ *
+ * @param array $params fields from the form and plugin settings.
+ *
+ * @return string of data in xml format
+ */
 function pagseguro_transparent_ccxml($params) {
     return "<? xml version=\"1.0\" encoding=\"ISO-8859-1\" standalone=\"yes\" ?>
         <payment>

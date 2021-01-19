@@ -17,7 +17,7 @@
 /**
  * This file keeps track of upgrades to the pagseguro enrolment plugin
  *
- * @package    enrol
+ * @package    enrol_pagseguro
  * @subpackage pagseguro
  * @copyright  2010 Eugene Venter
  * @author     Eugene Venter
@@ -42,7 +42,12 @@
 // before any action that may take longer time to finish.
 
 defined('MOODLE_INTERNAL') || die;
-
+/**
+ * This function will attempt to upgrade from older versions
+ *
+ * @param mixed $oldversion
+ * @return boolean
+ */
 function xmldb_enrol_pagseguro_upgrade($oldversion) {
     return true;
 }

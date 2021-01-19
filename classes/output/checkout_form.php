@@ -17,8 +17,8 @@
 /**
  * Class containing data for index page
  *
- * @package    local_hackfest
- * @copyright  2015 Damyon Wiese
+ * @package    enrol_pagseguro
+ * @copyright  2020 Igor Agatti Lima
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace enrol_pagseguro\output;
@@ -33,16 +33,23 @@ use renderer_base;
 use stdClass;
 
 /**
- * Class containing data for index page
+ * Class containing data for pagseguro modal form
  *
- * @copyright  2015 Damyon Wiese
+ * @copyright  2020 Igor Agatti Lima
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class checkout_form implements renderable, templatable {
 
 
+    /** @var array $formparams */
     public $formparams = array();
 
+	/**
+     * Constructor class that sets formparams.
+     *
+     * @param array $fparams
+     * @return stdClass
+     */
     public function __construct(array $fparams = array()) {
         $this->formparams = $fparams;
     }
@@ -50,7 +57,8 @@ class checkout_form implements renderable, templatable {
     /**
      * Export this data so it can be used as the context for a mustache template.
      *
-     * @return stdClass
+     * @param renderer_base $output
+     * @return stdClass $dataobj
      */
     public function export_for_template(renderer_base $output) {
         global $USER, $COURSE, $PAGE;
@@ -69,7 +77,7 @@ class checkout_form implements renderable, templatable {
         if ($this->formparams['courseP']) {
             $data["price"] = $this->formparams['courseP'];
         }
-
-        return json_encode($data);
+		$dataobj = json_encode($data); 
+        return $dataobj;
     }
 }

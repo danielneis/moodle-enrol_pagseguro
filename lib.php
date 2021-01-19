@@ -49,18 +49,41 @@ class enrol_pagseguro_plugin extends enrol_plugin {
         return array(new pix_icon('icon', get_string('pluginname', 'enrol_pagseguro'), 'enrol_pagseguro'));
     }
 
+    /**
+     * Checks if there are any protected roles.
+     *
+     * @return boolean
+     */
     public function roles_protected() {
         return false;
     }
 
+    /**
+     * Checks if there are any protected roles.
+     *
+     * @param stdClass $instance
+     * @return boolean
+     */
     public function allow_unenrol(stdClass $instance) {
         return true;
     }
 
+    /**
+     * Checks if management is allowed.
+     *
+     * @param stdClass $instance
+     * @return boolean
+     */
     public function allow_manage(stdClass $instance) {
         return true;
     }
 
+    /**
+     * Shows the self enrolment link.
+     *
+     * @param stdClass $instance
+     * @return boolean
+     */
     public function show_enrolme_link(stdClass $instance) {
         return ($instance->status == ENROL_INSTANCE_ENABLED);
     }
@@ -68,7 +91,8 @@ class enrol_pagseguro_plugin extends enrol_plugin {
     /**
      * Sets up navigation entries.
      *
-     * @param object $instance
+     * @param mixed $instancesnode
+     * @param stdClass $instance
      * @return void
      */
     public function add_course_navigation($instancesnode, stdClass $instance) {
@@ -190,8 +214,14 @@ class enrol_pagseguro_plugin extends enrol_plugin {
                 $tcdata["cfgRoot"] = $CFG->wwwroot;
                 $tcdata["courseP"] = (float) $instance->cost;
                 $tcdata["getSessionUrl"] = new moodle_url('/enrol/pagseguro/tr_process.php');
+                
+                if (get_config('enrol_pagseguro', 'usesandbox') == 1) {
+                    $tcdata['js_url'] = 'https://stc.sandbox.pagseguro.uol.com.br/pagseguro/api/v2/checkout/pagseguro.directpayment.js';
+                } else {
+                    $tcdata['js_url'] = 'https://stc.pagseguro.uol.com.br/pagseguro/api/v2/checkout/pagseguro.directpayment.js';
+                } 
 
-                $PAGE->requires->js_call_amd('enrol_pagseguro/transparent-checkout', 'init');
+                //$PAGE->requires->js_call_amd('enrol_pagseguro/transparent-checkout', 'init');
 
                 $output = $OUTPUT->render_from_template("enrol_pagseguro/transparentcheckout", $tcdata);
 

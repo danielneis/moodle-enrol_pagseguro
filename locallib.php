@@ -26,8 +26,19 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once("$CFG->libdir/formslib.php");
 
+/**
+ * Pagseguro enrol plugin implementation.
+ *
+ * @copyright  2015 Daniel Neis
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class enrol_pagseguro_enrol_form extends moodleform {
 
+    /**
+     * Creates edit form for single course enrolment settings.
+     *
+     * @return void
+     */
     public function definition() {
         $mform = $this->_form;
         $mform = $this->_form;
