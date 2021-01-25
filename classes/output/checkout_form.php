@@ -44,7 +44,7 @@ class checkout_form implements renderable, templatable {
     /** @var array $formparams */
     public $formparams = array();
 
-	/**
+    /**
      * Constructor class that sets formparams.
      *
      * @param array $fparams
@@ -77,7 +77,7 @@ class checkout_form implements renderable, templatable {
         if ($this->formparams['courseP']) {
             $data["price"] = $this->formparams['courseP'];
         }
-		$dataobj = json_encode($data); 
+        $dataobj = json_encode($data);
         return $dataobj;
     }
 }

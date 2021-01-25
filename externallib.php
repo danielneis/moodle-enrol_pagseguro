@@ -53,14 +53,14 @@ class enrol_pagseguro_external extends external_api {
      */
     public static function get_session($courseprice) {
         global $USER;
-        
+
         $psemail = get_config('enrol_pagseguro', 'pagsegurobusiness');
         $pstoken = get_config('enrol_pagseguro', 'pagsegurotoken');
         if (get_config('enrol_pagseguro', 'usesandbox') == 1) {
             $baseurl = 'https://ws.sandbox.pagseguro.uol.com.br/v2/sessions?email=';
         } else {
             $baseurl = 'https://ws.pagseguro.uol.com.br/v2/sessions?email=';
-        } 
+        }
 
         $params = self::validate_parameters(self::get_session_parameters(),
             array(
@@ -69,8 +69,6 @@ class enrol_pagseguro_external extends external_api {
         );
 
         $url = $baseurl . urlencode($psemail) . '&token=' . $pstoken;
-        
-        //var_dump($url);
 
         $curl = curl_init($url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);

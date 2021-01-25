@@ -26,87 +26,45 @@
 var brandName = '';
 var ghash = '';
 
-function loadDoc(courseid, p){
-    require(['core/ajax'], function(ajax) {
-        var promises = ajax.call([{
-            methodname: 'enrol_pagseguro_get_session',
-            args:{'courseP': p }
-        }]);
-        promises[0].done(function(response) {
-            setPagueSeguroWSSessionId(response.stoken,courseid, response.courseP);
-        }).fail(function(response) {
-            // Do something with the exception.
-        });
-    });
-}
-
-function setPagueSeguroWSSessionId(sessionId,courseId, courseP){
-    PagSeguroDirectPayment.setSessionId(sessionId);
-    PagSeguroDirectPayment.getPaymentMethods({
-        success: function() {
-            // Retorna os meios de pagamento disponíveis.
-            require(['jquery', 'core/ajax', 'core/templates', 'core/notification','enrol_pagseguro/jqmask'],
-            function($, ajax, templates, notification, jqmask) {
-                var promises = ajax.call([{
-                    methodname: 'enrol_pagseguro_get_forms',
-                    args:{ 'sessionId' : sessionId, 'courseId': courseId, 'courseP': courseP }
-                }]);
-                promises[0].done(function(response) {
-                    templates.render('enrol_pagseguro/checkout_form', JSON.parse(response)).done(function(html, js) {
-                        $('#modal-return').html(html);
-                        templates.runTemplateJS(js);
-                        PagSeguroDirectPayment.onSenderHashReady(function(response){
-                            if(response.status == 'error') {
-                                return false;
-                            }
-                            var hash = response.senderHash; // Hash estará disponível nesta variável.
-                            ghash = hash;
-                            createMasks();
-                        });
-                    }).fail(notification.exception);
-
-                }).fail(function() {
-                    // Do something with the exception.
-                });
-            });
-        },
-        error: function(response) {
-            // Callback para chamadas que falharam.
-            document.getElementById("return").innerHTML = JSON.stringify(response);
-        },
-        complete: function() {
-            // Callback para todas chamadas.
+require(['jquery'], function($){
+    $(document).on('submit', '#pagseguro_boleto_form', function(e) {
+        if(boletoValidateFields()){
+            $("#pagseguro_boleto_form input[name=sender_hash]").val(ghash);
+            var urlParams = new URLSearchParams(window.location.search);
+            $("#boleto_courseid").val(urlParams.get('id'));
+        } else {
+            e.preventDefault();
         }
     });
-}
-
-function createMasks(){
-    require(['jquery'], function($){
-        var ph_options = {
-            onKeyPress: function(ph, e, field, ph_options){
-                var masks = ['(00) 0000-00009', '(00) 0 0000-0000'];
-                var mask = (ph.length > 14) ? masks[1] : masks [0];
-                $('.input-phone').mask(mask, ph_options);
-            }
-        };
-        $('.input-phone').mask("(00) 0000-0000", ph_options);
-        var options = {
-            onKeyPress: function(doc, e, field, options){
-                var masks = ['000.000.000-009', '00.000.000/0000-00'];
-                var mask = (doc.length > 14) ? masks[1] : masks [0];
-                $('.input-cpfcnpj').mask(mask, options);
-            }
-        };
-        $('.input-cpfcnpj').mask("000.000.000-009", options);
-        $('.input-ccnumber').mask('0000 0000 0000 0000');
-        $('.input-ccvalid').mask('00/0000');
-        $('.input-cvv').mask('000');
-        $('.input-cep').mask('00000-000');
+    $(document).on('click', '#cc_submit', function() {
+        if(ccValidateFields()){
+            var ccNum = $("input[name=ccnumber]").val().replace(/\s/g, '');
+            var ccCvv = $("input[name=cvv]").val();
+            var ccExp = $("input[name=ccvalid]").val().split("/");
+            PagSeguroDirectPayment.createCardToken({
+                cardNumber: ccNum, // Número do cartão de crédito.
+                brand: brandName, // Bandeira do cartão.
+                cvv: ccCvv, // CVV do cartão.
+                expirationMonth: ccExp[0], // Mês da expiração do cartão.
+                expirationYear: ccExp[1], // Ano da expiração do cartão, é necessário os 4 dígitos.
+                success: function(response) {
+                    $("#cc_token").val(response.card.token);
+                    var urlParams = new URLSearchParams(window.location.search);
+                    $("#cc_courseid").val(urlParams.get('id'));
+                    $("#cc_instval").val($("#installments").find(':selected').data('installment-value'));
+                    $("#pagseguro_cc_form").submit();
+                },
+                error: function() {
+                    // Callback para chamadas que falharam.
+                },
+                complete: function() {
+                    // Callback para todas chamadas.
+                }
+            });
+        }
     });
-}
 
-function buscaCEP(){
-    require(['jquery'],function($){
+    $(document).on('focusout', '#billingpostcode', function() {
         var cep = $('#billingpostcode').val().replace(/\D/g, '');
         // Verifica se campo cep possui valor informado.
         if (cep != "") {
@@ -143,6 +101,85 @@ function buscaCEP(){
             // Cep sem valor, limpa formulário.
             limpa_formulário_cep();
         }
+    });
+});
+
+function loadDoc(courseid, p){
+    require(['core/ajax'], function(ajax) {
+        var promises = ajax.call([{
+            methodname: 'enrol_pagseguro_get_session',
+            args:{'courseP': p }
+        }]);
+        promises[0].done(function(response) {
+            setPagueSeguroWSSessionId(response.stoken,courseid, response.courseP);
+        }).fail(function() {
+            // Do something with the exception.
+        });
+    });
+}
+
+function setPagueSeguroWSSessionId(sessionId,courseId, courseP){
+    PagSeguroDirectPayment.setSessionId(sessionId);
+    PagSeguroDirectPayment.getPaymentMethods({
+        success: function() {
+            // Retorna os meios de pagamento disponíveis.
+            require(['jquery', 'core/ajax', 'core/templates', 'core/notification'],
+            function($, ajax, templates, notification) {
+                var promises = ajax.call([{
+                    methodname: 'enrol_pagseguro_get_forms',
+                    args:{ 'sessionId' : sessionId, 'courseId': courseId, 'courseP': courseP }
+                }]);
+                promises[0].done(function(response) {
+                    templates.render('enrol_pagseguro/checkout_form', JSON.parse(response)).done(function(html, js) {
+                        $('#modal-return').html(html);
+                        templates.runTemplateJS(js);
+                        PagSeguroDirectPayment.onSenderHashReady(function(response){
+                            if(response.status == 'error') {
+                                return false;
+                            }
+                            var hash = response.senderHash; // Hash estará disponível nesta variável.
+                            ghash = hash;
+                            createMasks();
+                        });
+                    }).fail(notification.exception);
+
+                }).fail(function() {
+                    // Do something with the exception.
+                });
+            });
+        },
+        error: function(response) {
+            // Callback para chamadas que falharam.
+            document.getElementById("return").innerHTML = JSON.stringify(response);
+        },
+        complete: function() {
+            // Callback para todas chamadas.
+        }
+    });
+}
+
+function createMasks(){
+    require(['jquery', 'enrol_pagseguro/jqmask'], function($, jqmask){
+        var ph_options = {
+            onKeyPress: function(ph, e, field, ph_options){
+                var masks = ['(00) 0000-00009', '(00) 0 0000-0000'];
+                var mask = (ph.length > 14) ? masks[1] : masks [0];
+                $('.input-phone').mask(mask, ph_options);
+            }
+        };
+        $('.input-phone').mask("(00) 0000-0000", ph_options);
+        var options = {
+            onKeyPress: function(doc, e, field, options){
+                var masks = ['000.000.000-009', '00.000.000/0000-00'];
+                var mask = (doc.length > 14) ? masks[1] : masks [0];
+                $('.input-cpfcnpj').mask(mask, options);
+            }
+        };
+        $('.input-cpfcnpj').mask("000.000.000-009", options);
+        $('.input-ccnumber').mask('0000 0000 0000 0000');
+        $('.input-ccvalid').mask('00/0000');
+        $('.input-cvv').mask('000');
+        $('.input-cep').mask('00000-000');
     });
 }
 
@@ -191,7 +228,8 @@ function installments(brandName,cp){
                 if(!response["error"]){
                     var sel_installments = '<select id="installments" name="ccinstallments">';
                     response["installments"][brandName].forEach(function(inst){
-                        sel_installments += '<option value="' + inst["quantity"] + '" data-installment-value="' + inst["installmentAmount"].toFixed(2) + '" >';
+                        sel_installments += '<option value="' + inst["quantity"];
+                        sel_installments += '" data-installment-value="' + inst["installmentAmount"].toFixed(2) + '" >';
                         sel_installments += inst["quantity"] + 'x de ' + inst["installmentAmount"].toFixed(2);
                         sel_installments += '</option>';
                     });
@@ -211,50 +249,58 @@ function installments(brandName,cp){
 
 }
 
-function paycc(){
-    if(!ccValidateFields()){
-        return;
-    }else{
-        require(['jquery'], function($){
-            var ccNum = $("input[name=ccnumber]").val().replace(/\s/g, '');
-            var ccCvv = $("input[name=cvv]").val();
-            var ccExp = $("input[name=ccvalid]").val().split("/");
-            PagSeguroDirectPayment.createCardToken({
-                cardNumber: ccNum, // Número do cartão de crédito.
-                brand: brandName, // Bandeira do cartão.
-                cvv: ccCvv, // CVV do cartão.
-                expirationMonth: ccExp[0], // Mês da expiração do cartão.
-                expirationYear: ccExp[1], // Ano da expiração do cartão, é necessário os 4 dígitos.
-                success: function(response) {
-                    if(ccValidateFields()){
-                        $("input[name=cc_token]").val(response.card.token);
-                        var urlParams = new URLSearchParams(window.location.search);
-                        $("input[name=courseid]").val(urlParams.get('id'));
-                        $("input[name=inst_val]").val($("#installments").data('data-installment-value'));
-                        $("#pagseguro_cc_form").submit();
-                    }
-                },
-                error: function() {
-                    // Callback para chamadas que falharam.
-                },
-                complete: function() {
-                    // Callback para todas chamadas.
-                }
-            });
-        });
-    }
-}
+//function paycc(){
+//    if(!ccValidateFields()){
+//        return;
+//    }else{
+//        require(['jquery'], function($){
+//            var ccNum = $("input[name=ccnumber]").val().replace(/\s/g, '');
+//            var ccCvv = $("input[name=cvv]").val();
+//            var ccExp = $("input[name=ccvalid]").val().split("/");
+//            PagSeguroDirectPayment.createCardToken({
+//                cardNumber: ccNum, // Número do cartão de crédito.
+//                brand: brandName, // Bandeira do cartão.
+//                cvv: ccCvv, // CVV do cartão.
+//                expirationMonth: ccExp[0], // Mês da expiração do cartão.
+//                expirationYear: ccExp[1], // Ano da expiração do cartão, é necessário os 4 dígitos.
+//                success: function(response) {
+//                    if(ccValidateFields()){
+//                        $("input[name=cc_token]").val(response.card.token);
+//                        var urlParams = new URLSearchParams(window.location.search);
+//                        $("input[name=courseid]").val(urlParams.get('id'));
+//                        $("input[name=inst_val]").val($("#installments").data('data-installment-value'));
+//                        $("#pagseguro_cc_form").submit();
+//                    }
+//                },
+//                error: function() {
+//                    // Callback para chamadas que falharam.
+//                },
+//                complete: function() {
+//                    // Callback para todas chamadas.
+//                }
+//            });
+//        });
+//    }
+//}
 
-function payboleto(){
-    if(boletoValidateFields()){
-        require(['jquery'], function($){
-            $("#pagseguro_boleto_form input[name=sender_hash]").val(ghash);
-            var urlParams = new URLSearchParams(window.location.search);
-            $("#pagseguro_boleto_form input[name=courseid]").val(urlParams.get('id'));
-            $("#pagseguro_boleto_form").submit();
-        });
-    }
-}
+//function payboleto(e){
+//    require(['jquery'], function($){
+//       $("#pagseguro_boleto_form").submit(function(e) {
+//           e.preventDefault();
+//           console.log("submit prevented");
+//                $("#pagseguro_boleto_form input[name=sender_hash]").val(ghash);
+//                var urlParams = new URLSearchParams(window.location.search);
+//                $("#boleto_courseid").val(urlParams.get('id'));
+//        });
+//    });
+//    } else {
+//        require(['jquery'], function($){
+//            $("#pagseguro_boleto_form").on('submit', function(e){
+//                e.preventDefault();
+//            });
+//        });
+//    }
+//}
 
 function ccValidateFields(){
     var rtn = true;

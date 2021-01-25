@@ -214,14 +214,13 @@ class enrol_pagseguro_plugin extends enrol_plugin {
                 $tcdata["cfgRoot"] = $CFG->wwwroot;
                 $tcdata["courseP"] = (float) $instance->cost;
                 $tcdata["getSessionUrl"] = new moodle_url('/enrol/pagseguro/tr_process.php');
-                
+
                 if (get_config('enrol_pagseguro', 'usesandbox') == 1) {
-                    $tcdata['js_url'] = 'https://stc.sandbox.pagseguro.uol.com.br/pagseguro/api/v2/checkout/pagseguro.directpayment.js';
+                    $tcdata['js_url'] =
+                        'https://stc.sandbox.pagseguro.uol.com.br/pagseguro/api/v2/checkout/pagseguro.directpayment.js';
                 } else {
                     $tcdata['js_url'] = 'https://stc.pagseguro.uol.com.br/pagseguro/api/v2/checkout/pagseguro.directpayment.js';
-                } 
-
-                //$PAGE->requires->js_call_amd('enrol_pagseguro/transparent-checkout', 'init');
+                }
 
                 $output = $OUTPUT->render_from_template("enrol_pagseguro/transparentcheckout", $tcdata);
 
