@@ -248,7 +248,7 @@ function pagseguro_handle_transaction($transactionxml, $redirect = true) {
     if (!empty($mailstudents)) {
         $a = new stdClass();
         $a->coursename = format_string($course->fullname, true, array('context' => $coursecontext));
-        $a->profileurl = new moodle_url('/user/view.php', array('id' => $user->id));
+        $a->profileurl = "$CFG->wwwroot/user/view.php?id=$user->id&course=$course->id";
 
         if ($plugin->get_config('mailfromsupport') == 1) {
             $userfrom = core_user::get_support_user();
