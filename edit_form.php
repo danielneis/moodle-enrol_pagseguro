@@ -15,8 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Adds new instance of enrol_pagseguro to specified course
- * or edits current instance.
+ * Adds new instance of enrol_pagseguro to specified course or edits current instance.
  *
  * @package    enrol_pagseguro
  * @copyright  2020 Daniel Neis Araujo <danielneis@gmail.com>
@@ -27,8 +26,19 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir.'/formslib.php');
 
+/**
+ * Adds new instance of enrol_pagseguro to specified course or edits current instance.
+ *
+ * @copyright  2020 Daniel Neis Araujo <danielneis@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class enrol_pagseguro_edit_form extends moodleform {
 
+    /**
+     * Creates edit form for single course enrolment settings.
+     *
+     * @return void
+     */
     public function definition() {
         $mform = $this->_form;
 
@@ -84,6 +94,14 @@ class enrol_pagseguro_edit_form extends moodleform {
         $this->set_data($instance);
     }
 
+    /**
+     * Validates form against enrolment instance status, enrolment date,
+     * and the cost value.
+     *
+     * @param mixed $data
+     * @param mixed $files
+     * @return mixed $errors
+     */
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 

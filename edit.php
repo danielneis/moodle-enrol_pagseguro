@@ -15,8 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Adds new instance of enrol_pagseguro to specified course
- * or edits current instance.
+ * Adds new instance of enrol_pagseguro to specified course or edits current instance.
  *
  * @package    enrol_pagseguro
  * @copyright  2020 Daniel Neis Araujo <danielneis@gmail.com>
@@ -46,10 +45,12 @@ if (!enrol_is_enabled('pagseguro')) {
 $plugin = enrol_get_plugin('pagseguro');
 
 if ($instanceid) {
-    $instanceparams = ['courseid' => $course->id, 'enrol' => 'pagseguro', 'id' => $instanceid];
-    $instance = $DB->get_record('enrol', $instanceparams, '*', MUST_EXIST);
+    $instance = $DB->get_record('enrol',
+        array('courseid' => $course->id, 'enrol' => 'pagseguro', 'id' => $instanceid),
+        '*', MUST_EXIST);
 } else {
     require_capability('moodle/course:enrolconfig', $context);
+    // No instance yet, we have to add new instance.
     navigation_node::override_active_url(new moodle_url('/enrol/instances.php', array('id' => $course->id)));
     $instance = new stdClass();
     $instance->id       = null;

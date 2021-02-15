@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<libraries>
+    <library>
+        <location>vendor/jquery-mask</location>
+        <name>jquery-mask</name>
+        <version>v1.14.16</version>
+        <license>MIT</license>
+    </library>
+</libraries>

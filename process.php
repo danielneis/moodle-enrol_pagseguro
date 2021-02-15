@@ -87,6 +87,14 @@ if ($submited) {
     pagseguro_handle_old_notification_system($pagsegurowsbaseurl, $notificationcode, $email, $token);
 }
 
+/**
+ * Handles the transaction xml sent from pagseguro
+ *
+ * @param string $transactionxml
+ * @param boolean $redirect
+ *
+ * @return void
+ */
 function pagseguro_handle_transaction($transactionxml, $redirect = true) {
     global $CFG, $USER, $DB;
 
@@ -313,6 +321,14 @@ function pagseguro_handle_transaction($transactionxml, $redirect = true) {
     redirect(new moodle_url('/enrol/pagseguro/return.php', array('id' => $data->courseid)));
 }
 
+/**
+ * Sends an error message to admin, in case of error
+ *
+ * @param string $subject
+ * @param mixed $data
+ *
+ * @return void
+ */
 function pagseguro_message_error_to_admin($subject, $data) {
 
     $admin = get_admin();
@@ -338,6 +354,20 @@ function pagseguro_message_error_to_admin($subject, $data) {
     message_send($eventdata);
 }
 
+/**
+ * Handles checkout
+ *
+ * @param string $pagsegurowsbaseurl webservice base url
+ * @param string $pagsegurobaseurl base url
+ * @param string $email email of receiver in Pagseguro account
+ * @param string $token token of receiver in Pagseguro account
+ * @param string $courseid id of the course being bought
+ * @param stdClass $plugin pagseguro plugin
+ * @param stdClass $plugininstance the instance of the plugin in the course
+ * @param stdClass $course the course that is being bought
+ *
+ * @return void
+ */
 function pagseguro_handle_checkout($pagsegurowsbaseurl, $pagsegurobaseurl, $email, $token,
     $courseid, $plugin, $plugininstance, $course) {
 
@@ -398,6 +428,16 @@ function pagseguro_handle_checkout($pagsegurowsbaseurl, $pagsegurobaseurl, $emai
     header('Location: '. $pagsegurobaseurl . '/v2/checkout/payment.html?code='.$xml->code);
 }
 
+/**
+ * Redirects user back to Moodle site in case of Unauthorized error
+ *
+ * @param string $pagsegurobaseurl base url
+ * @param string $transactionid
+ * @param string $email email of receiver in Pagseguro account
+ * @param string $token token of receiver in Pagseguro account
+ *
+ * @return void
+ */
 function pagseguro_handle_redirect_back($pagsegurobaseurl, $transactionid, $email, $token) {
 
     $url = "{$pagsegurobaseurl}/v2/transactions/{$transactionid}?email={$email}&token={$token}";
@@ -415,6 +455,16 @@ function pagseguro_handle_redirect_back($pagsegurobaseurl, $transactionid, $emai
     }
 }
 
+/**
+ * Handles the old notification system from pagseguro
+ *
+ * @param string $pagsegurobaseurl base url
+ * @param string $notificationcode
+ * @param string $email email of receiver in Pagseguro account
+ * @param string $token token of receiver in Pagseguro account
+ *
+ * @return void
+ */
 function pagseguro_handle_old_notification_system($pagsegurobaseurl, $notificationcode, $email, $token) {
 
     $transactionsv2url = $pagsegurobaseurl .'/v2/transactions/notifications/';

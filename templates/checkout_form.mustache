@@ -1,0 +1,209 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template enrol_pagseguro/checkout_form
+
+    The content to display when editing a tool.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * rows An array of objects with label, hidelabel, text and id
+
+    Example context (json):
+    {
+        "rows": [
+            {
+                "label": "Tool URL",
+                "text": "http://example.com/",
+                "id": "toolurl",
+                "hidelabel": false
+            },
+            {
+                "label": "Secret",
+                "text": "ABCDEF1234567890",
+                "id": "secret",
+                "hidelabel": true
+            }
+        ]
+    }
+}}
+
+<style type="text/css">
+#cardbrand {
+    float: right;
+    position: relative;
+    bottom: 30px;
+    right: 20px;
+}
+</style>
+
+<ul class="nav nav-tabs" role="tablist">
+	<li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#CREDIT_CARD" aria-controls="CREDIT_CARD">Cartão de Crédito</a></li>
+	<li class="nav-item"><a class="nav-link" data-toggle="tab" href="#BOLETO" aria-controls="BOLETO">Boleto</a></li>	
+</ul>
+<div class="tab-content">
+	<div id="CREDIT_CARD" class="tab-pane fade show active" role="tabpanel" aria-labelledby="CREDIT_CARD" >
+		<form id="pagseguro_cc_form" action="pagseguro/tr_process.php" method="POST">
+			<br />
+			<br />
+			<div class="form-group row">
+				<div class="col-xs-12 col-xl-12 error" id="ccEmail-error"></div>
+				<label class="col-sm-2 col-form-label" for="senderemail" >Email:</label>
+				<div class="col-sm-10">
+					<input id="ccEmail" placeholder="Email" class="form-control" type="email" name="senderemail" value="{{ email }}" />
+				</div>
+			</div>
+			<div class="form-group row">
+			    <div class="col-xs-12 col-xl-12 error" id="ccPhone-error"></div>
+			    <div class="col-xs-12 col-xl-12 error" id="ccCPFCNPJ-error"></div>
+				<label class="col-sm-2 col-form-label" for="senderphonenumber">Telefone:</label>
+				<div class="col-sm-4">
+					<input id="ccPhone" placeholder="(00) 9999-9999" class="form-control input-phone" type="text" name="senderphonenumber" />
+				</div>
+				<label class="col-sm-2 col-form-label " for="sendercpfcnpj">CPF/CNPJ:</label>
+				<div class="col-sm-4">
+					<input id="ccCPFCNPJ" placeholder="000.000.000-00" class="form-control input-cpfcnpj" type="text" name="sendercpfcnpj" />
+				</div>
+			</div>
+			<hr />
+			<div class="form-group">
+				<div class="col-xs-12 col-xl-12 error" id="ccName-error"></div>
+				<label  for="ccholdername">Nome no Cartão:</label>
+				<input id="ccName" class="form-control" type="text" name="ccholdername" value="{{ fullname }}"  />
+			</div>
+			<div class="form-group">
+			    <div class="col-xs-12 col-xl-12 error" id="ccNumber-error"></div>
+				<label for="ccnumber">Número Cartão</label>
+				<input id="ccNumber" class="form-control input-ccnumber" type="text" name="ccnumber" onchange="checkBrand(this,{{ price }})" />
+				<span id="cardbrand"></span>
+			</div>
+			<div class="form-group row">
+				<div class="col-xs-12 col-xl-12 error" id="ccvalid-error"></div>
+				<div class="col-xs-12 col-xl-12 error" id="cvv-error"></div>
+				<label class="col-sm-2 col-form-label" for="ccvalid">Validade:</label>
+				<div class="col-sm-4">
+					<input id="ccvalid" class="form-control input-ccvalid" type="text" name="ccvalid" />
+				</div>
+				<label class="col-sm-2 col-form-label" for="cvv">CVV:</label>
+				<div class="col-sm-4">
+					<input id="cvv" class="form-control input-cvv" type="text" name="cvv" />
+				</div>
+			</div>
+			<div id="card-installments" class="form-group">
+				
+			</div>
+			
+			
+			<hr />
+			<div class="form-group row">
+				<div class="col-xs-12 col-xl-12 error" id="billingpostcode-error"></div>
+				<div class="col-xs-12 col-xl-12 error" id="billingnumber-error"></div>
+				<label class="col-sm-2 col-form-label">CEP:</label>
+				<div class="col-sm-6">
+					<input class="form-control input-cep" type="text" name="billingpostcode" id="billingpostcode" />
+				</div>
+				<label class="col-sm-2 col-form-label">Número:</label>
+				<div class="col-sm-2">
+					<input class="form-control" type="text" name="billingnumber" />
+				</div>
+			</div>
+			<div class="form-group row">
+			    <div class="col-xs-12 col-xl-12 error" id="billingstreet-error"></div>
+				<label class="col-sm-2 col-form-label">Logradouro:</label>
+				<div class="col-sm-10">
+					<input class="form-control" type="text" name="billingstreet" id="billingstreet" />
+				</div>
+				
+			</div>
+			<div class="form-group row">
+				<div class="col-xs-12 col-xl-12 error" id="billingstate-error"></div>
+				<label class="col-sm-1 col-form-label">UF:</label>
+				<div class="col-sm-2">
+					<input class="form-control" type="text" name="billingstate" id="billingstate" />
+				</div>
+				<label class="col-sm-3 col-form-label">Complemento:</label>
+				<div class="col-sm-6">
+					<input class="form-control" type="text" name="billingcomplement" id="billingcomplement" />
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-xs-12 col-xl-12 error" id="billingdistrict-error"></div>
+				<div class="col-xs-12 col-xl-12 error" id="billingcity-error"></div>
+				<label class="col-sm-2 col-form-label">Bairro:</label>
+				<div class="col-sm-4">
+					<input class="form-control" type="text" name="billingdistrict" id="billingdistrict" />
+				</div>
+				<label class="col-sm-2 col-form-label">Cidade:</label>
+				<div class="col-sm-4">
+					<input class="form-control" type="text" name="billingcity" id="billingcity" />
+				</div>
+			</div>
+			<hr />
+			<div class="form-group row">
+				<span class="btn btn-primary" id="cc_submit" type="submit"> Pagar </span>
+			</div>
+			
+			<input type="hidden" name="pay_method" value="cc">
+			<input type="hidden" name="cc_token" id="cc_token" value="">
+			<input type="hidden" name="courseid" id="cc_courseid" value="">
+			<input type="hidden" name="inst_val" id="cc_instval" value="">
+		</form>
+		
+	</div>
+	<div id="BOLETO" class="tab-pane fade" role="tabpanel" aria-labelledby="BOLETO" >
+		<form id="pagseguro_boleto_form" action="pagseguro/tr_process.php" method="POST">
+			<br />
+			<br />
+			<div class="form-group">
+				<div class="col-xs-12 col-xl-12 error" id="boleto_nome-error"></div>
+				<label for="sendername">Nome Completo:</label>
+				<input placeholder="Nome completo" id="boleto_nome" class="form-control" type="text" name="sendername" value="{{ fullname }}" />
+			</div>
+			<div class="form-group row">
+				<div class="col-xs-12 col-xl-12 error" id="boleto_email-error"></div>
+				<label class="col-sm-2 col-form-label" for="senderemail">Email:</label>
+				<div class="col-sm-10">
+					<input placeholder="Email" id="boleto_email" class="form-control" type="email" name="senderemail" value="{{ email }}" />
+				</div>
+			</div>
+			<div class="form-group row">
+				<div class="col-xs-12 col-xl-12 error" id="boleto_phone-error"></div>
+				<div class="col-xs-12 col-xl-12 error" id="boleto_doc-error"></div>
+				<label class="col-sm-2 col-form-label" for="senderphonenumber">Telefone:</label>
+				<div class="col-sm-4">
+					<input placeholder="(00) 9999-9999" id="boleto_phone" class="form-control input-phone" type="text" name="senderphonenumber" />
+				</div>
+				<label class="col-sm-2 col-form-label" for="sendercpfcnpj">CPF/CNPJ:</label>
+				<div class="col-sm-4">
+					<input placeholder="000.000.000-00" id="boleto_doc" class="form-control input-cpfcnpj" type="text" name="sendercpfcnpj" />
+				</div>
+			</div>
+			<hr />
+			<div class="form-group row">
+				<button class="btn btn-primary" type="submit">Pagar</button>
+			</div>
+			<input type="hidden" name="pay_method" value="boleto">
+			<input type="hidden" name="sender_hash" value="">
+			<input id="boleto_courseid" type="hidden" name="courseid" value="">
+		</form>
+	</div>
+</div>

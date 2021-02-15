@@ -49,18 +49,41 @@ class enrol_pagseguro_plugin extends enrol_plugin {
         return array(new pix_icon('icon', get_string('pluginname', 'enrol_pagseguro'), 'enrol_pagseguro'));
     }
 
+    /**
+     * Checks if there are any protected roles.
+     *
+     * @return boolean
+     */
     public function roles_protected() {
         return false;
     }
 
+    /**
+     * Checks if there are any protected roles.
+     *
+     * @param stdClass $instance
+     * @return boolean
+     */
     public function allow_unenrol(stdClass $instance) {
         return true;
     }
 
+    /**
+     * Checks if management is allowed.
+     *
+     * @param stdClass $instance
+     * @return boolean
+     */
     public function allow_manage(stdClass $instance) {
         return true;
     }
 
+    /**
+     * Shows the self enrolment link.
+     *
+     * @param stdClass $instance
+     * @return boolean
+     */
     public function show_enrolme_link(stdClass $instance) {
         return ($instance->status == ENROL_INSTANCE_ENABLED);
     }
@@ -68,7 +91,8 @@ class enrol_pagseguro_plugin extends enrol_plugin {
     /**
      * Sets up navigation entries.
      *
-     * @param object $instance
+     * @param mixed $instancesnode
+     * @param stdClass $instance
      * @return void
      */
     public function add_course_navigation($instancesnode, stdClass $instance) {
@@ -180,7 +204,30 @@ class enrol_pagseguro_plugin extends enrol_plugin {
                      '<p>', get_string('needsignuporlogin', 'enrol_pagseguro'), '</p>',
                      '<p><a href="', new moodle_url('/login'), '">', get_string('loginsite'), '</a></p>',
                      '</div>';
+            } else if ( $this->get_config('transparentcheckout') == 1 ) {
+
+                $tcdata = array();
+                $tcdata["requestPayment"] = get_string('paymentrequired', 'enrol_pagseguro', $instance);
+                $tcdata["instanceName"] = $this->get_instance_name($instance);
+                $tcdata["instanceId"] = $instance->courseid;
+                $tcdata["buttonString"] = get_string('sendpaymentbutton', 'enrol_pagseguro');
+                $tcdata["cfgRoot"] = $CFG->wwwroot;
+                $tcdata["courseP"] = (float) $instance->cost;
+                $tcdata["getSessionUrl"] = new moodle_url('/enrol/pagseguro/tr_process.php');
+
+                if (get_config('enrol_pagseguro', 'usesandbox') == 1) {
+                    $tcdata['js_url'] =
+                        'https://stc.sandbox.pagseguro.uol.com.br/pagseguro/api/v2/checkout/pagseguro.directpayment.js';
+                } else {
+                    $tcdata['js_url'] = 'https://stc.pagseguro.uol.com.br/pagseguro/api/v2/checkout/pagseguro.directpayment.js';
+                }
+
+                $output = $OUTPUT->render_from_template("enrol_pagseguro/transparentcheckout", $tcdata);
+
+                return $output;
+
             } else {
+
                 require_once("$CFG->dirroot/enrol/pagseguro/locallib.php");
                 // Sanitise some fields before building the pagseguro form.
                 $coursefullname  = format_string($course->fullname, true, array('context' => $context));
@@ -196,6 +243,7 @@ class enrol_pagseguro_plugin extends enrol_plugin {
 
                 ob_start();
                 $form->display();
+                echo $this->get_config('transparentcheckout');
                 $output = ob_get_clean();
                 return $OUTPUT->box($output);
             }

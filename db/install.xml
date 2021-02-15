@@ -6,22 +6,41 @@
   <TABLES>
     <TABLE NAME="enrol_pagseguro" COMMENT="Holds all known information about pagseguro transactions">
       <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="business"/>
-        <FIELD NAME="business" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="id" NEXT="receiver_email"/>
-        <FIELD NAME="receiver_email" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="business" NEXT="courseid"/>
-        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="receiver_email" NEXT="userid"/>
-        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="courseid" NEXT="instanceid"/>
+      
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" NEXT="pgseguro_token"/>
+        
+        <FIELD NAME="pagseguro_token" COMMENT="Token of the business that will receive this transaction" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="id" NEXT="pgseguro_email"/>
+        
+        <FIELD NAME="pagseguro_email" COMMENT="Email of the business that will receive this trasnaction" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="pgseguro_token" NEXT="courseid"/>
+        
+        <FIELD NAME="courseid" COMMENT="ID of the course being bought" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="receiver_email" NEXT="userid"/>
+        
+        <FIELD NAME="userid" COMMENT="ID of the user that is buying" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="courseid" NEXT="instanceid"/>
+        
         <FIELD NAME="instanceid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="userid" NEXT="date"/>
-        <FIELD NAME="date" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="instanceid" NEXT="code"/>
-        <FIELD NAME="code" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="date" NEXT="reference"/>
-        <FIELD NAME="reference" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="code" NEXT="type"/>
-        <FIELD NAME="type" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="reference" NEXT="status"/>
-        <FIELD NAME="status" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="type" NEXT="paymentmethod_type"/>
-        <FIELD NAME="paymentmethod_type" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="status" NEXT="paymentmethod_code"/>
-        <FIELD NAME="paymentmethod_code" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="paymentmethod_type" NEXT="grossamount"/>
-        <FIELD NAME="grossamount" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="paymentmethod_code" NEXT="timeupdated"/>
-        <FIELD NAME="timeupdated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="grossamount" NEXT="payment_status"/>
-        <FIELD NAME="payment_status" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false" PREVIOUS="timeupdated" NEXT="xmlstring"/>
+        
+        <FIELD NAME="date" COMMENT="Date that the user requested the buy" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="instanceid" NEXT="code"/>
+        
+        <FIELD NAME="code" COMMENT="The transaction code" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" PREVIOUS="date" NEXT="reference"/>
+        
+        <FIELD NAME="reference" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" PREVIOUS="code" NEXT="type"/>
+        
+        <FIELD NAME="type" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" PREVIOUS="reference" NEXT="status"/>
+        
+        <FIELD NAME="status" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" PREVIOUS="type" NEXT="paymentmethod_type"/>
+        
+        <FIELD NAME="paymentmethod_type" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" PREVIOUS="status" NEXT="paymentmethod_code"/>
+        
+        <FIELD NAME="paymentmethod_code" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" PREVIOUS="paymentmethod_type" NEXT="grossamount"/>
+        
+        <FIELD NAME="grossamount" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" PREVIOUS="paymentmethod_code" NEXT="discountedamount"/>
+        
+        <FIELD NAME="discountedamount" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" PREVIOUS="grossamount" NEXT="timeupdated"/>
+        
+        <FIELD NAME="timeupdated" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="discountedamount" NEXT="payment_status"/>
+        
+        <FIELD NAME="payment_status" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false" PREVIOUS="timeupdated" NEXT="xmlstring"/>
+        
         <FIELD NAME="xmlstring" TYPE="text" LENGTH="small" NOTNULL="false" SEQUENCE="false" COMMENT="Notification XML" PREVIOUS="payment_status" /> 
       </FIELDS>
       <KEYS>
